@@ -1,0 +1,4 @@
+module stopwatch (
+);
+
+endmodule
