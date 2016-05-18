@@ -21,7 +21,7 @@ module control_fsm (
 								PRE-START 	= 11'd1,
 								RUN 			= 11'd2,
 								PRE-PAUSE 	= 11'd3,
-								PAUSE 			= 11'd4,
+								PAUSE 		= 11'd4,
 								RETRIEVE 	= 11'd5,
 								SAVE 			= 11'd6,
 								PRE-RESET 	= 11'd7,
