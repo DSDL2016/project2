@@ -1,2 +1,6 @@
 # intermediate files
 db/
+
+# compiled result
+simulation/
+build/
