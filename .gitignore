@@ -4,3 +4,6 @@ db/
 # compiled result
 simulation/
 build/
+
+# backups
+*.bak
