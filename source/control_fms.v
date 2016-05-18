@@ -1,7 +1,7 @@
 module control_fsm (
-	input				clock,
-	input		[5:0]	stimulus,
-	output	[]		state
+	input						clock,
+	input			[5:0]		stimulus,
+	output reg	[10:0]	state
 );
 
 	/*
@@ -17,19 +17,19 @@ module control_fsm (
 	/*
 	 * State-parameter definitions.
 	 */
-	parameter [10:0] 	IDLE			= 11'd0,
-							PRE-START 	= 11'd1,
-							RUN 			= 11'd2,
-							PRE-PAUSE 	= 11'd3,
-							PAUSE 		= 11'd4,
-							RETRIEVE 	= 11'd5,
-							SAVE 			= 11'd6,
-							PRE-RESET 	= 11'd7,
-							RESET 		= 11'd8,
-							PRE-CLEAR 	= 11'd9,
-							CLEAR 		= 11'd10;
+	parameter	[10:0] 	IDLE			= 11'd0,
+								PRE-START 	= 11'd1,
+								RUN 			= 11'd2,
+								PRE-PAUSE 	= 11'd3,
+								PAUSE 			= 11'd4,
+								RETRIEVE 	= 11'd5,
+								SAVE 			= 11'd6,
+								PRE-RESET 	= 11'd7,
+								RESET 		= 11'd8,
+								PRE-CLEAR 	= 11'd9,
+								CLEAR 		= 11'd10;
 	
-	reg [10:0] state, next;
+	reg	[10:0]	next;
 	
 	initial begin
 		// reset the state and start from RESET
@@ -106,5 +106,5 @@ module control_fsm (
 			end
 		endcase
 	end
-
+	
 endmodule
