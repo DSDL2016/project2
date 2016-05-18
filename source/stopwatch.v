@@ -3,27 +3,27 @@ module stopwatch (
 	input						run,
 	input						reset,
 	output	[6*3-1:0]	epoch,
-	output	[9:0]			m_epoch
+	output	[7:0]			m_epoch
 );
 	
 	/*
-	 * Divide the 50Mhz input to 1kHz.
+	 * Divide the 50Mhz input to 100Hz.
 	 */
-	reg	[14:0]	divider_counter;
-	reg				clock_1k;
+	reg	[17:0]	divider_counter;
+	reg				clock_100;
 	
 	initial begin
 		divider_counter <= 0;
-		clock_1k <= 0;
+		clock_100 <= 0;
 	end
 		
 	always @(posedge clock) begin
-		if (divider_counter < 24999) begin
+		if (divider_counter < 249999) begin
 			divider_counter <= divider_counter + 1;
 		end
 		else begin
 			divider_counter <= 0;
-			clock_1k <= ~clock_1k;
+			clock_100 <= ~clock_100;
 		end
 	end	
 	
@@ -32,7 +32,7 @@ module stopwatch (
 	 * Internal counters.
 	 */
 	reg	[5:0]	hour, minute, second;
-	reg	[9:0]	m_sec;
+	reg	[7:0]	m_sec;
 	
 	initial begin
 		hour 		<= 0;
@@ -41,7 +41,7 @@ module stopwatch (
 		m_sec 	<= 0;
 	end
 	
-	wire internal_clock = (clock_1k & run);
+	wire internal_clock = (clock_100 & run);
 	
 	always @(posedge internal_clock or posedge reset) begin
 		if (reset) begin
@@ -53,7 +53,7 @@ module stopwatch (
 		else begin
 			m_sec <= m_sec + 1;
 		
-			if (m_sec == 1000) begin
+			if (m_sec == 100) begin
 				m_sec <= 0;
 				second <= second + 1;
 			end
@@ -77,4 +77,5 @@ module stopwatch (
 	
 	assign epoch 	= {hour, minute, second};
 	assign m_epoch	= m_sec;
+	
 endmodule
