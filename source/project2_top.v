@@ -44,5 +44,25 @@ module project2_top (
 		.epoch		({hour, minute, second}),
 		.m_epoch		(m_sec)
 	);
+	
+	bin2bcd conv_m_sec (
+		.bin	(m_sec),
+		.bcd	()
+	);
+	
+	bin2bcd conv_second (
+		.bin	(second),
+		.bcd	()
+	);
+	
+	bin2bcd conv_minute (
+		.bin	(minute),
+		.bcd	()
+	);
+	
+	bin2bcd conv_hour (
+		.bin	(hour),
+		.bcd	()
+	);
 
 endmodule
