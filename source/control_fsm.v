@@ -18,15 +18,15 @@ module control_fsm (
 	 * State-parameter definitions.
 	 */
 	parameter	[10:0] 	IDLE			= 11'd0,
-								PRE-START 	= 11'd1,
+								PRE_START 	= 11'd1,
 								RUN 			= 11'd2,
-								PRE-PAUSE 	= 11'd3,
+								PRE_PAUSE 	= 11'd3,
 								PAUSE 		= 11'd4,
 								RETRIEVE 	= 11'd5,
 								SAVE 			= 11'd6,
-								PRE-RESET 	= 11'd7,
+								PRE_RESET 	= 11'd7,
 								RESET 		= 11'd8,
-								PRE-CLEAR 	= 11'd9,
+								PRE_CLEAR 	= 11'd9,
 								CLEAR 		= 11'd10;
 	
 	reg	[10:0]	next;
@@ -42,36 +42,36 @@ module control_fsm (
 		state <= next;
 	end
 	
-	always @(state or start_pause or lap or reset or clear) begin
+	always @(state or start_pause or lap or reset or clear or lcd_busy or reg_busy) begin
 		// reset the register
 		next = 11'b0;
 		
 		case (1'b1) // synopsys full_case parallel_case
 		state[IDLE]: begin
-				if (clear)						next[PRE-CLEAR]	= 1'b1;
-				if (!clear & start_pause)	next[PRE-START]	= 1'b1;
+				if (clear)						next[PRE_CLEAR]	= 1'b1;
+				if (!clear & start_pause)	next[PRE_START]	= 1'b1;
 				if (!clear & !start_pause)	next[IDLE]			= 1'b1;
 			end
 			
-		state[PRE-START]: begin
+		state[PRE_START]: begin
 				if (start_pause)				next[PRE_START] 	= 1'b1;
 				if (!start_pause) 			next[RUN] 			= 1'b1;
 			end
 		
 		state[RUN]: begin
 				if (lap)							next[RETRIEVE] 	= 1'b1;
-				if (!lap & start_pause) 	next[PRE-PAUSE] 	= 1'b1;
+				if (!lap & start_pause) 	next[PRE_PAUSE] 	= 1'b1;
 				if (!lap & !start_pause)	next[RUN] 			= 1'b1;
 			end
 		
-		state[PRE-PAUSE]: begin
+		state[PRE_PAUSE]: begin
 				if (!start_pause)				next[PAUSE] 		= 1'b1;
-				if (start_pause)				next[PRE-PAUSE] 	= 1'b1;
+				if (start_pause)				next[PRE_PAUSE] 	= 1'b1;
 			end
 			
 		state[PAUSE]: begin
-				if (reset)						next[PRE-RESET] 	= 1'b1;
-				if (!reset & start_pause)	next[PRE-START] 	= 1'b1;
+				if (reset)						next[PRE_RESET] 	= 1'b1;
+				if (!reset & start_pause)	next[PRE_START] 	= 1'b1;
 				if (!reset & !start_pause)	next[PAUSE] 		= 1'b1;
 			end
 			
@@ -85,9 +85,9 @@ module control_fsm (
 				if (lcd_busy)					next[SAVE]			= 1'b1;
 			end
 			
-		state[PRE-RESET]: begin
+		state[PRE_RESET]: begin
 				if (!reset)						next[RESET]			= 1'b1;
-				if (reset)						next[PRE-RESET]	= 1'b1;
+				if (reset)						next[PRE_RESET]	= 1'b1;
 			end
 			
 		state[RESET]: begin
@@ -95,14 +95,19 @@ module control_fsm (
 				if (reg_busy)					next[RESET]			= 1'b1;
 			end
 			
-		state[PRE-CLEAR]: begin
+		state[PRE_CLEAR]: begin
 				if (!clear)						next[CLEAR]			= 1'b1;
-				if (clear)						next[PRE-CLEAR]	= 1'b1;
+				if (clear)						next[PRE_CLEAR]	= 1'b1;
 			end
 			
 		state[CLEAR]: begin
 				if	(!lcd_busy)					next[RESET]			= 1'b1;
 				if (lcd_busy)					next[CLEAR]			= 1'b1;
+			end
+		
+		// directly go to IDLE if error occurred
+		~|state: begin
+													next[IDLE]			= 1'b1;
 			end
 		endcase
 	end

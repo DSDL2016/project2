@@ -41,52 +41,37 @@ module stopwatch (
 		m_sec 	<= 0;
 	end
 	
-	always @(posedge reset) begin
-		hour 		<= 0;
-		minute 	<= 0;
-		second 	<= 0;
-		m_sec 	<= 0;
-	end
-	
 	wire internal_clock = (clock_1k & run);
 	
-	always @(posedge internal_clock) begin
-		if (m_sec < 1000)	begin
+	always @(posedge internal_clock or posedge reset) begin
+		if (reset) begin
+			hour 		<= 0;
+			minute 	<= 0;
+			second 	<= 0;
+			m_sec 	<= 0;
+		end
+		else begin
 			m_sec <= m_sec + 1;
-		end 
-		else begin
-			m_sec <= 0;
-			second <= second + 1;
-		end
-	end
+		
+			if (m_sec == 1000) begin
+				m_sec <= 0;
+				second <= second + 1;
+			end
+		
+			if (second == 60) begin 
+				second <= 0;
+				minute <= minute + 1;
+			end
 	
-	assign @(posedge internal_clock) begin
-		if (second < 60) begin
-			second <= second + 1;
-		end
-		else begin 
-			second <= 0;
-			minute <= minute + 1;
-		end
-	end
+			if (minute == 60) begin
+				minute <= 0;
+				hour <= hour + 1;
+			end
 	
-	assign @(posedge internal_clock) begin
-		if (minute < 60) begin
-			minute <= minute + 1;
-		end
-		else begin
-			minute <= 0;
-			hour <= hour + 1;
-		end
-	end
-	
-	assign @(posedge internal_clock) begin
-		if (hour < 24) begin
-			hour <= hour + 1;
-		end
-		else begin
-			hour <= 0;
-			// TODO: indicator for overflow
+			if (hour == 24) begin
+				hour <= 0;
+				// TODO: indicator for overflow
+			end
 		end
 	end
 	
