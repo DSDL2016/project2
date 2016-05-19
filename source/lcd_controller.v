@@ -1,80 +1,98 @@
 module lcd_controller (
 	// host side interface
 	input 		clock,
-	input			reset,
 	input	[7:0]	data,
-	input			iRS,
+	input			rs,
 	input			start,
 	output reg	done,
 	
 	// lcd module interface
-	output		LCD_DATA,
-	output		LCD_RW,
-	output reg	LCD_EN,
-	output		LCD_RS
+	output		lcd_data,
+	output		lcd_rs,
+	output		lcd_rw,
+	output reg	lcd_en
 );
 
-	parameter	clock_divider	=	16;
-
+	// divide the clock by 16
+	parameter clock_divider = 16;
+	
+	/*
+	 * LCM control states.
+	 */
+	parameter [1:0] 	IDLE			= 1'd0,
+							WRITE_START	= 1'd1,
+							WRITE_WAIT	= 1'd2,
+							WRITE_END	= 1'd3;
+							
 	/*
 	 * Internal registers.
 	 */
-	reg	[4:0]	Cont;	
-	reg	[1:0]	ST;
-	reg			preStart, mStart;
+	reg	[4:0]	clock_counter;
+	reg	[1:0]	state;
+	reg			pre_start, lcd_busy;
 
-/////////////////////////////////////////////
-//	Only write to LCD, bypass iRS to LCD_RS
-assign	LCD_DATA	=	data; 
-assign	LCD_RW		=	1'b0;
-assign	LCD_RS		=	iRS;
-/////////////////////////////////////////////
-
-always@(posedge clock or negedge reset)
-begin
-	if(!reset)
-	begin
-		done	<=	1'b0;
-		LCD_EN	<=	1'b0;
-		preStart<=	1'b0;
-		mStart	<=	1'b0;
-		Cont	<=	0;
-		ST		<=	0;
+	/*
+	 * LCM low level control, write only.
+	 */
+	assign lcd_data = data;
+	assign lcd_rs	 = rs;
+	assign lcd_rw	 = 1'b0;
+	
+	/*
+	 * LCM control sequence.
+	 */
+	initial begin
+		// bus state
+		lcd_en 			<= 1'b0;
+		
+		// device state
+		pre_start 		<= 1'b0;
+		lcd_busy			<=	1'b0;
+		done 				<= 1'b0;
+		
+		clock_counter	<=	1'b0;
+		state				<=	IDLE;
 	end
-	else
-	begin
-		//////	Input Start Detect ///////
-		preStart<=	start;
-		if({preStart,start}==2'b01)
-		begin
-			mStart	<=	1'b1;
-			done	<=	1'b0;
+	
+	always @(posedge clock) begin
+		// detect start trigger
+		pre_start <= start;
+		if ({pre_start, start} == 2'b01) begin
+			lcd_busy	<=	1'b1;
+			done		<=	1'b0;
 		end
-		//////////////////////////////////
-		if(mStart)
-		begin
-			case(ST)
-			0:	ST	<=	1;	//	Wait Setup
-			1:	begin
-					LCD_EN	<=	1'b1;
-					ST		<=	2;
+		
+		if (lcd_busy) begin
+			case(state)
+				IDLE:	begin
+					state					<=	WRITE_START;
 				end
-			2:	begin					
-					if(Cont<clock_divider)
-					Cont	<=	Cont+1;
+				
+				WRITE_START:	begin
+					lcd_en				<=	1'b1;
+					state					<=	WRITE_WAIT;
+				end
+				
+				WRITE_WAIT:	begin			
+					if(clock_counter < clock_divider)
+						clock_counter	<= clock_counter+1;
 					else
-					ST		<=	3;
+						state				<=	WRITE_END;
 				end
-			3:	begin
-					LCD_EN	<=	1'b0;
-					mStart	<=	1'b0;
-					done	<=	1'b1;
-					Cont	<=	0;
-					ST		<=	0;
+				
+				WRITE_END:	begin
+					// bus state
+					lcd_en				<=	1'b0;
+					
+					// device state
+					lcd_busy				<=	1'b0;
+					done					<=	1'b1;
+					
+					clock_counter		<=	5'd0;
+					state					<=	IDLE;
 				end
 			endcase
 		end
 	end
-end
 
 endmodule

@@ -21,7 +21,7 @@ parameter	LCD_INTIAL	=	0;
 parameter	LCD_LINE1	=	5;
 parameter	LCD_CH_LINE	=	LCD_LINE1+16;
 parameter	LCD_LINE2	=	LCD_LINE1+16+1;
-parameter	LUT_SIZE	=	LCD_LINE1+32+1;
+parameter	LUT_SIZE		=	LCD_LINE1+32+1;
 
 always@(posedge iCLK or negedge iRST_N)
 begin
@@ -118,18 +118,20 @@ begin
 	default:		LUT_DATA	<=	9'h000;
 	endcase
 end
-
-lcd_controller 		u0	(	//	Host Side
-							.iDATA(mLCD_DATA),
-							.iRS(mLCD_RS),
-							.iStart(mLCD_Start),
-							.oDone(mLCD_Done),
-							.iCLK(iCLK),
-							.iRST_N(iRST_N),
-							//	LCD Interface
-							.LCD_DATA(LCD_DATA),
-							.LCD_RW(LCD_RW),
-							.LCD_EN(LCD_EN),
-							.LCD_RS(LCD_RS)	);
+							
+	lcd_controller device (
+		// host side interface
+		.clock		(iCLK),
+		.data			(mLCD_DATA),
+		.rs			(mLCD_RS),
+		.start		(mLCD_Start),
+		.done			(mLCD_Done),
+		
+		// lcd module interface
+		.lcd_data	(LCD_DATA),
+		.lcd_rs		(LCD_RS),
+		.lcd_rw		(LCD_RW),
+		.lcd_en		(LCD_EN)
+	);
 
 endmodule
