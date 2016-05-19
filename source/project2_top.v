@@ -47,6 +47,9 @@ module project2_top (
 		.PB_db	(clear_neg)
 	);
 	
+	assign start_pause_ind = start_pause;
+	assign reset_ind = reset;
+	
 	/*
 	 * Key FSM.
 	 */
@@ -60,6 +63,9 @@ module project2_top (
 		.run_timer		(run_timer),
 		.reset_timer	(reset_timer)
 	);
+	
+	assign run_timer_ind = run_timer;
+	assign reset_timer_ind = reset_timer;
 	
 	/*
 	 * Timer logic.
