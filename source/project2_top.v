@@ -23,7 +23,6 @@ module project2_top (
 );
 	
 	wire 				lcd_busy, reg_busy;
-	wire	[10:0]	state;
 	
 	/*
 	 * Debounce the buttons.
@@ -98,6 +97,8 @@ module project2_top (
 	/*
 	 * 7-segment display.
 	 */
+	wire	[3:0]	bcd_data	[0:7];
+	
 	wire	[3:0]	m_sec_bcd1, m_sec_bcd0;
 	wire	[3:0]	second_bcd1, second_bcd0;
 	wire	[3:0]	minute_bcd1, minute_bcd0;
@@ -186,12 +187,18 @@ module project2_top (
 	/*
 	 * LCM driver.
 	 */
-	assign	LCD_ON		=	1'b1;
-	assign	LCD_BLON	=	1'b1;
+	assign LCD_ON		=	1'b1;
+	assign LCD_BLON	=	1'b1;
 
-	lcd_bridge lcm_driver(
-					clock_50m, 1'b1,
-					//	LCD Side
-					LCD_DATA,LCD_RW,LCD_EN,LCD_RS	);
+	lcd_bridge lcd(
+		.iCLK		(clock_50m),
+		.iRST_N	(1'b1),
+		
+		// lcd module interface
+		.LCD_DATA	(LCD_DATA),
+		.LCD_RS		(LCD_RS),
+		.LCD_RW		(LCD_RW),
+		.LCD_EN		(LCD_EN)
+	);
 	
 endmodule
