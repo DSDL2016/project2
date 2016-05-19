@@ -51,10 +51,12 @@ module project2_top (
 	wire run_timer, reset_timer;
 	
 	key_logic_fsm key_logic (
-		.clock		(clock_50m),
-		.reset		(1'b0),
-		.k3			(start_pause),
-		.run_timer	(run_timer)
+		.clock			(clock_50m),
+		.reset			(1'b0),
+		.k3				(start_pause),
+		.k1				(reset),
+		.run_timer		(run_timer),
+		.reset_timer	(reset_timer)
 	);
 	
 	/*
