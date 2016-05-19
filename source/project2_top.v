@@ -1,9 +1,9 @@
 module project2_top (
 	input				clock_50m,
-	input				start_pause,
-	input				lap,
-	input				reset,
-	input				clear,
+	input				start_pause_btn,
+	input				lap_btn,
+	input				reset_btn,
+	input				clear_btn,
 	output	[6:0]	hour_hex1, hour_hex0,
 	output	[6:0]	minute_hex1, minute_hex0,
 	output	[6:0]	second_hex1, second_hex0,
@@ -15,6 +15,17 @@ module project2_top (
 	
 	wire	[5:0]		hour, minute, second;
 	wire	[6:0]		m_sec;
+	
+	/*
+	 * Debounce the buttons.
+	 */
+	wire start_pause = ~start_pause_neg;
+	
+	debouncer start_pause_db (
+		.clk			(clock_50m), 
+		.PB			(start_pause_btn), 
+		.PB_state	(start_pause_neg)
+	);
 	
 	/*
 	 * Key FSM.
@@ -29,6 +40,7 @@ module project2_top (
 	);
 	
 	assign m_sec = (run_timer) ? 1 : 0;
+	assign second = start_pause;
 	
 	/*
 	 * 7-segment display.
@@ -117,4 +129,5 @@ module project2_top (
 		.common_anode	(1'b1),
 		.seven_segment	(hour_hex0)
 	);
+	
 endmodule
