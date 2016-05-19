@@ -22,9 +22,9 @@ module project2_top (
 	wire start_pause = ~start_pause_neg;
 	
 	debouncer start_pause_db (
-		.clk			(clock_50m), 
-		.PB			(start_pause_btn), 
-		.PB_state	(start_pause_neg)
+		.clock	(clock_50m), 
+		.PB		(start_pause_btn), 
+		.PB_db	(start_pause_neg)
 	);
 	
 	/*
