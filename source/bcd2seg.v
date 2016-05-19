@@ -18,8 +18,9 @@ module bcd2seg (
 			7: seven_segment = 7'b0000111;
 			8: seven_segment = 7'b1111111;
 			9: seven_segment = 7'b1100111;
+			default: seven_segment = 7'b0000000;
 		endcase 
-		if (blank == 1'b1) 			seven_segment = 7'b000_0000 ;
+		if (blank == 1'b1) 			seven_segment = 7'b0000000 ;
 		if (common_anode == 1'b1) 	seven_segment = ~seven_segment ;
 	end
 
