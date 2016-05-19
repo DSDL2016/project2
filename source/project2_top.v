@@ -13,9 +13,6 @@ module project2_top (
 	wire 				lcd_busy, reg_busy;
 	wire	[10:0]	state;
 	
-	wire	[5:0]		hour, minute, second;
-	wire	[6:0]		m_sec;
-	
 	/*
 	 * Debounce the buttons.
 	 */
@@ -39,8 +36,21 @@ module project2_top (
 		.run_timer	(run_timer)
 	);
 	
-	assign m_sec = (run_timer) ? 1 : 0;
-	assign second = start_pause;
+	/*
+	 * Timer logic.
+	 */
+	wire	[5:0]		hour, minute, second;
+	wire	[6:0]		m_sec;
+	
+	stopwatch sw_timer (
+		.clock 	(clock_50m),
+		.run		(run_timer),
+		.reset	(reset_timer),
+		.hour		(hour),
+		.minute	(minute),
+		.second	(second),
+		.m_sec	(m_sec)
+	);
 	
 	/*
 	 * 7-segment display.

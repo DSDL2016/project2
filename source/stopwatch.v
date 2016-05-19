@@ -1,9 +1,9 @@
 module stopwatch (
-	input						clock,
-	input						run,
-	input						reset,
-	output	[6*3-1:0]	epoch,
-	output	[7:0]			m_epoch
+	input					clock,
+	input					run,
+	input					reset,
+	output reg	[6:0]	hour, minute, second,
+	output reg	[7:0]	m_sec
 );
 	
 	/*
@@ -31,9 +31,6 @@ module stopwatch (
 	/*
 	 * Internal counters.
 	 */
-	reg	[5:0]	hour, minute, second;
-	reg	[7:0]	m_sec;
-	
 	initial begin
 		hour 		<= 0;
 		minute	<= 0;
@@ -74,8 +71,5 @@ module stopwatch (
 			end
 		end
 	end
-	
-	assign epoch 	= {hour, minute, second};
-	assign m_epoch	= m_sec;
 	
 endmodule
