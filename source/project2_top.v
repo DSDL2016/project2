@@ -7,7 +7,9 @@ module project2_top (
 	output	[6:0]	hour_hex1, hour_hex0,
 	output	[6:0]	minute_hex1, minute_hex0,
 	output	[6:0]	second_hex1, second_hex0,
-	output	[6:0]	m_sec_hex1, m_sec_hex0
+	output	[6:0]	m_sec_hex1, m_sec_hex0,
+	output			start_pause_ind, run_timer_ind,
+	output			reset_ind, reset_timer_ind
 );
 	
 	wire 				lcd_busy, reg_busy;
