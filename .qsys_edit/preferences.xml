@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<preferences>
+ <debug showDebugMenu="0" />
+ <systemtable>
+  <columns>
+   <connections preferredWidth="47" />
+   <irq preferredWidth="34" />
+  </columns>
+ </systemtable>
+ <clocktable>
+  <columns>
+   <clockname preferredWidth="269" />
+   <clocksource preferredWidth="269" />
+   <frequency preferredWidth="250" />
+  </columns>
+ </clocktable>
+ <library
+   expandedCategories="Library/Memories and Memory Controllers/External Memory Interfaces,Library/Peripherals/Debug and Performance,Library/Memories and Memory Controllers/On-Chip,Library/DSP,Library,Library/PLL,Library/Merlin Components,Library/Peripherals/Display,Project,Library/Peripherals/Microcontroller Peripherals,Library/Qsys Interconnect,Library/Clock and Reset,Library/Embedded Processors,Library/Bridges and Adapters,Library/Peripherals,Library/Configuration &amp; Programming,Library/Memories and Memory Controllers,Library/Bridges,Library/Microcontroller Peripherals" />
+ <window width="1100" height="800" x="0" y="0" />
+ <hdlexample language="VERILOG" />
+</preferences>

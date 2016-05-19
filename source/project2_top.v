@@ -14,55 +14,107 @@ module project2_top (
 	wire	[10:0]	state;
 	
 	wire	[5:0]		hour, minute, second;
-	wire	[9:0]		m_sec;
+	wire	[6:0]		m_sec;
 	
 	/*
-	 * Branch out the states.
+	 * Key FSM.
 	 */
-	wire	IDLE 			= state[0];
-	wire	PRE_START 	= state[1];
-	wire 	RUN 			= state[2];
-	wire	PRE_PAUSE 	= state[3];
-	wire	PAUSE 		= state[4];
-	wire	RETRIEVE 	= state[5];
-	wire	SAVE			= state[6];
-	wire	PRE_RESET 	= state[7];
-	wire	RESET 		= state[8];
-	wire	PRE_CLEAR 	= state[9];
-	wire	CLEAR 		= state[10];
+	wire run_timer, reset_timer;
 	
-	control_fsm fsm (
+	key_logic_fsm key_logic (
 		.clock		(clock_50m),
-		.stimulus	({start_pause, lap, reset, clear, lcd_busy, reg_busy}),
-		.state		(state)
+		.reset		(1'b0),
+		.k3			(start_pause),
+		.run_timer	(run_timer)
 	);
 	
-	stopwatch sw (
-		.clock 		(clock_50m),
-		.run			(RUN),
-		.reset		(RESET),
-		.epoch		({hour, minute, second}),
-		.m_epoch		(m_sec)
-	);
+	assign m_sec = (run_timer) ? 1 : 0;
+	
+	/*
+	 * 7-segment display.
+	 */
+	wire	[3:0]	m_sec_bcd1, m_sec_bcd0;
+	wire	[3:0]	second_bcd1, second_bcd0;
+	wire	[3:0]	minute_bcd1, minute_bcd0;
+	wire	[3:0]	hour_bcd1, hour_bcd0;
 	
 	bin2bcd conv_m_sec (
-		.bin	(m_sec),
-		.bcd	()
+		.bin	({1'b0, m_sec}),
+		.bcd1	(m_sec_bcd1),
+		.bcd0	(m_sec_bcd0)
 	);
 	
+	bcd2seg seg_m_sec_hex1 (
+		.bcd				(m_sec_bcd1),
+		.blank			(1'b0),
+		.common_anode	(1'b1),
+		.seven_segment	(m_sec_hex1)
+	);
+	
+	bcd2seg seg_m_sec_hex0 (
+		.bcd				(m_sec_bcd0),
+		.blank			(1'b0),
+		.common_anode	(1'b1),
+		.seven_segment	(m_sec_hex0)
+	);
+
 	bin2bcd conv_second (
-		.bin	(second),
-		.bcd	()
+		.bin	({1'b0, second}),
+		.bcd1	(second_bcd1),
+		.bcd0	(second_bcd0)
+	);
+	
+	bcd2seg seg_second_hex1 (
+		.bcd				(second_bcd1),
+		.blank			(1'b0),
+		.common_anode	(1'b1),
+		.seven_segment	(second_hex1)
+	);
+	
+	bcd2seg seg_second_hex0 (
+		.bcd				(second_bcd0),
+		.blank			(1'b0),
+		.common_anode	(1'b1),
+		.seven_segment	(second_hex0)
 	);
 	
 	bin2bcd conv_minute (
-		.bin	(minute),
-		.bcd	()
+		.bin	({1'b0, minute}),
+		.bcd1	(minute_bcd1),
+		.bcd0	(minute_bcd0)
+	);
+	
+	bcd2seg seg_minute_hex1 (
+		.bcd				(minute_bcd1),
+		.blank			(1'b0),
+		.common_anode	(1'b1),
+		.seven_segment	(minute_hex1)
+	);
+	
+	bcd2seg seg_minute_hex0 (
+		.bcd				(minute_bcd0),
+		.blank			(1'b0),
+		.common_anode	(1'b1),
+		.seven_segment	(minute_hex0)
 	);
 	
 	bin2bcd conv_hour (
-		.bin	(hour),
-		.bcd	()
+		.bin	({1'b0, hour}),
+		.bcd1	(hour_bcd1),
+		.bcd0	(hour_bcd0)
 	);
-
+	
+	bcd2seg seg_hour_hex1 (
+		.bcd				(hour_bcd1),
+		.blank			(1'b0),
+		.common_anode	(1'b1),
+		.seven_segment	(hour_hex1)
+	);
+	
+	bcd2seg seg_hour_hex0 (
+		.bcd				(hour_bcd0),
+		.blank			(1'b0),
+		.common_anode	(1'b1),
+		.seven_segment	(hour_hex0)
+	);
 endmodule

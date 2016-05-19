@@ -51,9 +51,6 @@ set_global_assignment -name EDA_OUTPUT_DATA_FORMAT "VERILOG HDL" -section_id eda
 set_global_assignment -name TIMEQUEST_MULTICORNER_ANALYSIS ON
 set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
 set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
-set_global_assignment -name VERILOG_FILE source/control_fsm.v
-set_global_assignment -name VERILOG_FILE source/project2_top.v
-set_global_assignment -name VERILOG_FILE source/stopwatch.v
 set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
 set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
 set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
@@ -119,5 +116,11 @@ set_location_assignment PIN_AD11 -to m_sec_hex0[3]
 set_location_assignment PIN_AC12 -to m_sec_hex0[2]
 set_location_assignment PIN_AB12 -to m_sec_hex0[1]
 set_location_assignment PIN_AF10 -to m_sec_hex0[0]
+set_global_assignment -name VERILOG_FILE fsm/key_logic_fsm.v
+set_global_assignment -name SMF_FILE fsm/key_logic_fsm.smf
+set_global_assignment -name VERILOG_FILE source/control_fsm.v
+set_global_assignment -name VERILOG_FILE source/project2_top.v
+set_global_assignment -name VERILOG_FILE source/stopwatch.v
 set_global_assignment -name VERILOG_FILE source/bin2bcd.v
+set_global_assignment -name VERILOG_FILE source/bcd2seg.v
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

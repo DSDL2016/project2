@@ -1,32 +1,21 @@
-module bin2bcd #(
-	parameter width	= 6,
-	parameter digits	= 2
-)(
-	input			[width-1:0]			bin,
-	output reg	[bcd_width-1:0]	bcd
+module bin2bcd (
+	input			[6:0]	bin,
+	output reg	[3:0]	bcd1, bcd0
 );
-
-	localparam bcd_width = digits * 4;
 	
-	integer i, j;
-	
-	reg	[width-1:0]	r_bin;
-	always @(*) begin
-		// initialize bcd register to 0
-		bcd = 0;
-
-		// iterate through all the digits from r_bin
-		for (i = 0; i < width; i = i+1) begin
-			// concat selected bit to the end
-			bcd = {bcd[(bcd_width-1)-1:0], r_bin[(width-1)-i]};
-
-			//if a hex digit is more than 4, add 3
-			if (i < width-1) begin
-				for (j = 3; j < bcd_width; j = j+4) begin
-					if (bcd[j -: 4] > 4)
-						bcd[j -: 4] = bcd[j -: 4]+3;
-				end
-			end
+	reg	[7:0]	bcd;
+	integer  i;
+	always @ (bin) begin
+		bcd1 = 4'd0 ;
+		bcd0 = 4'd0 ;
+		for (i = 0; i < 7; i = i+1) begin
+			if (bcd0 >= 4'd5)	bcd0 = bcd0 + 4'd3 ;
+			if (bcd1 >= 4'd5)	bcd1 = bcd1 + 4'd3 ;
+			bcd = {bcd1, bcd0} ;
+			bcd = bcd << 1;
+			bcd[0] = bin[6-i] ;
+			bcd1 = bcd[7:4] ;
+			bcd0 = bcd[3:0] ;
 		end
 	end
 
