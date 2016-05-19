@@ -1,15 +1,23 @@
 module project2_top (
 	input				clock_50m,
+	
+	// buttons
 	input				start_pause_btn,
 	input				lap_btn,
 	input				reset_btn,
 	input				clear_btn,
+	
+	// 7-segment displays
 	output	[6:0]	hour_hex1, hour_hex0,
 	output	[6:0]	minute_hex1, minute_hex0,
 	output	[6:0]	second_hex1, second_hex0,
 	output	[6:0]	m_sec_hex1, m_sec_hex0,
+	
+	// led indicators
 	output			start_pause_ind, run_timer_ind,
 	output			reset_ind, reset_timer_ind,
+	
+	// lcd module interface
 	output	[7:0]	LCD_DATA,
 	output			LCD_RW, LCD_EN, LCD_RS, LCD_ON, LCD_BLON
 );

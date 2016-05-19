@@ -1,42 +1,40 @@
-module lcd_controller (	
-						iDATA,iRS,
-						iStart,oDone,
-						iCLK,iRST_N,
-						//	LCD Interface
-						LCD_DATA,
-						LCD_RW,
-						LCD_EN,
-						LCD_RS	);
-//	CLK
-parameter	CLK_Divide	=	16;
+module lcd_controller (
+	// host side interface
+	input 		clock,
+	input			reset,
+	input	[7:0]	data,
+	input			iRS,
+	input			start,
+	output reg	done,
+	
+	// lcd module interface
+	output		LCD_DATA,
+	output		LCD_RW,
+	output reg	LCD_EN,
+	output		LCD_RS
+);
 
-//	Host Side
-input	[7:0]	iDATA;
-input	iRS,iStart;
-input	iCLK,iRST_N;
-output	reg		oDone;
-//	LCD Interface
-output	[7:0]	LCD_DATA;
-output	reg		LCD_EN;
-output			LCD_RW;
-output			LCD_RS;
-//	Internal Register
-reg		[4:0]	Cont;
-reg		[1:0]	ST;
-reg		preStart,mStart;
+	parameter	clock_divider	=	16;
+
+	/*
+	 * Internal registers.
+	 */
+	reg	[4:0]	Cont;	
+	reg	[1:0]	ST;
+	reg			preStart, mStart;
 
 /////////////////////////////////////////////
 //	Only write to LCD, bypass iRS to LCD_RS
-assign	LCD_DATA	=	iDATA; 
+assign	LCD_DATA	=	data; 
 assign	LCD_RW		=	1'b0;
 assign	LCD_RS		=	iRS;
 /////////////////////////////////////////////
 
-always@(posedge iCLK or negedge iRST_N)
+always@(posedge clock or negedge reset)
 begin
-	if(!iRST_N)
+	if(!reset)
 	begin
-		oDone	<=	1'b0;
+		done	<=	1'b0;
 		LCD_EN	<=	1'b0;
 		preStart<=	1'b0;
 		mStart	<=	1'b0;
@@ -46,11 +44,11 @@ begin
 	else
 	begin
 		//////	Input Start Detect ///////
-		preStart<=	iStart;
-		if({preStart,iStart}==2'b01)
+		preStart<=	start;
+		if({preStart,start}==2'b01)
 		begin
 			mStart	<=	1'b1;
-			oDone	<=	1'b0;
+			done	<=	1'b0;
 		end
 		//////////////////////////////////
 		if(mStart)
@@ -62,7 +60,7 @@ begin
 					ST		<=	2;
 				end
 			2:	begin					
-					if(Cont<CLK_Divide)
+					if(Cont<clock_divider)
 					Cont	<=	Cont+1;
 					else
 					ST		<=	3;
@@ -70,7 +68,7 @@ begin
 			3:	begin
 					LCD_EN	<=	1'b0;
 					mStart	<=	1'b0;
-					oDone	<=	1'b1;
+					done	<=	1'b1;
 					Cont	<=	0;
 					ST		<=	0;
 				end
