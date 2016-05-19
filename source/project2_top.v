@@ -17,11 +17,32 @@ module project2_top (
 	 * Debounce the buttons.
 	 */
 	wire start_pause = ~start_pause_neg;
+	wire lap = ~lap_neg;
+	wire reset = ~reset_neg;
+	wire clear = ~clear_neg;
 	
 	debouncer start_pause_db (
 		.clock	(clock_50m), 
 		.PB		(start_pause_btn), 
 		.PB_db	(start_pause_neg)
+	);
+	
+	debouncer lap_db (
+		.clock	(clock_50m),
+		.PB		(lap_btn),
+		.PB_db	(lap_neg)
+	);
+	
+	debouncer reset_db (
+		.clock	(clock_50m),
+		.PB		(reset_btn),
+		.PB_db	(reset_neg)
+	);
+	
+	debouncer clear_db (
+		.clock	(clock_50m),
+		.PB		(clear_btn),
+		.PB_db	(clear_neg)
 	);
 	
 	/*
