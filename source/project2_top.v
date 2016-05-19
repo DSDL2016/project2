@@ -9,7 +9,9 @@ module project2_top (
 	output	[6:0]	second_hex1, second_hex0,
 	output	[6:0]	m_sec_hex1, m_sec_hex0,
 	output			start_pause_ind, run_timer_ind,
-	output			reset_ind, reset_timer_ind
+	output			reset_ind, reset_timer_ind,
+	output	[7:0]	LCD_DATA,
+	output			LCD_RW, LCD_EN, LCD_RS, LCD_ON, LCD_BLON
 );
 	
 	wire 				lcd_busy, reg_busy;
@@ -172,5 +174,16 @@ module project2_top (
 		.common_anode	(1'b1),
 		.seven_segment	(hour_hex0)
 	);
+	
+	/*
+	 * LCM driver.
+	 */
+	assign	LCD_ON		=	1'b1;
+	assign	LCD_BLON	=	1'b1;
+
+	lcd_bridge lcm_driver(
+					clock_50m, 1'b1,
+					//	LCD Side
+					LCD_DATA,LCD_RW,LCD_EN,LCD_RS	);
 	
 endmodule

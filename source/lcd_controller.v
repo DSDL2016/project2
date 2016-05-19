@@ -1,4 +1,4 @@
-module lcd_controller (	//	Host Side
+module lcd_controller (	
 						iDATA,iRS,
 						iStart,oDone,
 						iCLK,iRST_N,
