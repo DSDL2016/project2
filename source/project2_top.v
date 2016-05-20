@@ -13,6 +13,8 @@ module project2_top (
 	output	[6:0]	second_hex1, second_hex0,
 	output	[6:0]	m_sec_hex1, m_sec_hex0,
 	
+	output	[7*8-1:0]	hex,
+	
 	// led indicators
 	output			start_pause_ind, run_timer_ind,
 	output			reset_ind, reset_timer_ind,
@@ -75,114 +77,60 @@ module project2_top (
 		.reset_timer	(reset_timer)
 	);
 	
-	assign run_timer_ind = run_timer;
-	assign reset_timer_ind = reset_timer;
+	assign run_timer_ind 	= run_timer;
+	assign reset_timer_ind 	= reset_timer;
 	
 	/*
 	 * Timer logic.
 	 */
-	wire	[5:0]		hour, minute, second;
-	wire	[6:0]		m_sec;
+	// 0: m_sec, second, minute, hour :3
+	wire	[6:0]			unit_time	[0:3];
 	
 	stopwatch sw_timer (
 		.clock 	(clock_50m),
 		.run		(run_timer),
 		.reset	(reset_timer),
-		.hour		(hour),
-		.minute	(minute),
-		.second	(second),
-		.m_sec	(m_sec)
+		.epoch	(ut_flat)
 	);
+	
+	// collapse the 1d array to 2d array
+	wire	[7*4-1:0]	ut_flat;
+	genvar ut_flat_idx;
+	generate
+		for (ut_flat_idx = 0; ut_flat_idx < 4; ut_flat_idx = ut_flat_idx+1) begin: ASSIGN_UT
+			assign unit_time[ut_flat_idx] = ut_flat[7*(ut_flat_idx+1)-1 -: 7];
+		end
+	endgenerate
 	
 	/*
 	 * 7-segment display.
 	 */
-	wire	[3:0]	bcd_data	[0:7];
-	
-	wire	[3:0]	m_sec_bcd1, m_sec_bcd0;
-	wire	[3:0]	second_bcd1, second_bcd0;
-	wire	[3:0]	minute_bcd1, minute_bcd0;
-	wire	[3:0]	hour_bcd1, hour_bcd0;
-	
-	bin2bcd conv_m_sec (
-		.bin	({1'b0, m_sec}),
-		.bcd1	(m_sec_bcd1),
-		.bcd0	(m_sec_bcd0)
-	);
-	
-	bcd2seg seg_m_sec_hex1 (
-		.bcd				(m_sec_bcd1),
-		.blank			(1'b0),
-		.common_anode	(1'b1),
-		.seven_segment	(m_sec_hex1)
-	);
-	
-	bcd2seg seg_m_sec_hex0 (
-		.bcd				(m_sec_bcd0),
-		.blank			(1'b0),
-		.common_anode	(1'b1),
-		.seven_segment	(m_sec_hex0)
-	);
+	wire	[3:0]	bcd_data	[0:3][0:1];
 
-	bin2bcd conv_second (
-		.bin	({1'b0, second}),
-		.bcd1	(second_bcd1),
-		.bcd0	(second_bcd0)
-	);
-	
-	bcd2seg seg_second_hex1 (
-		.bcd				(second_bcd1),
-		.blank			(1'b0),
-		.common_anode	(1'b1),
-		.seven_segment	(second_hex1)
-	);
-	
-	bcd2seg seg_second_hex0 (
-		.bcd				(second_bcd0),
-		.blank			(1'b0),
-		.common_anode	(1'b1),
-		.seven_segment	(second_hex0)
-	);
-	
-	bin2bcd conv_minute (
-		.bin	({1'b0, minute}),
-		.bcd1	(minute_bcd1),
-		.bcd0	(minute_bcd0)
-	);
-	
-	bcd2seg seg_minute_hex1 (
-		.bcd				(minute_bcd1),
-		.blank			(1'b0),
-		.common_anode	(1'b1),
-		.seven_segment	(minute_hex1)
-	);
-	
-	bcd2seg seg_minute_hex0 (
-		.bcd				(minute_bcd0),
-		.blank			(1'b0),
-		.common_anode	(1'b1),
-		.seven_segment	(minute_hex0)
-	);
-	
-	bin2bcd conv_hour (
-		.bin	({1'b0, hour}),
-		.bcd1	(hour_bcd1),
-		.bcd0	(hour_bcd0)
-	);
-	
-	bcd2seg seg_hour_hex1 (
-		.bcd				(hour_bcd1),
-		.blank			(1'b0),
-		.common_anode	(1'b1),
-		.seven_segment	(hour_hex1)
-	);
-	
-	bcd2seg seg_hour_hex0 (
-		.bcd				(hour_bcd0),
-		.blank			(1'b0),
-		.common_anode	(1'b1),
-		.seven_segment	(hour_hex0)
-	);
+	genvar ut_idx;
+	generate
+		for (ut_idx = 0; ut_idx < 4; ut_idx = ut_idx+1) begin: TIMER_BCD2SEG
+			bin2bcd time_to_digits (
+				.bin	(unit_time[ut_idx]),
+				.bcd1	(bcd_data[ut_idx][1]),
+				.bcd0	(bcd_data[ut_idx][0])
+			);
+			
+			bcd2seg digit1_to_hex (
+				.bcd				(bcd_data[ut_idx][1]),
+				.blank			(1'b0),
+				.common_anode	(1'b1),
+				.seven_segment	()
+			);
+			
+			bcd2seg digit0_to_hex (
+				.bcd				(bcd_data[ut_idx][0]),
+				.blank			(1'b0),
+				.common_anode	(1'b1),
+				.seven_segment	()
+			);
+		end
+	endgenerate
 	
 	/*
 	 * LCM driver.

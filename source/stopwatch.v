@@ -2,8 +2,7 @@ module stopwatch (
 	input					clock,
 	input					run,
 	input					reset,
-	output reg	[5:0]	hour, minute, second,
-	output reg	[6:0]	m_sec
+	output [7*4-1:0]	epoch
 );
 	
 	/*
@@ -31,45 +30,52 @@ module stopwatch (
 	/*
 	 * Internal counters.
 	 */
-	initial begin
-		hour 		<= 6'd0;
-		minute	<= 6'd0;
-		second 	<= 6'd0;
-		m_sec 	<= 7'd0;
-	end
+	wire 			internal_clock = (clock_100 & run);
+	reg	[6:0]	unit_time	[0:3];
 	
-	wire internal_clock = (clock_100 & run);
+	integer ut_idx;
+	initial begin
+		for (ut_idx = 0; ut_idx < 4; ut_idx = ut_idx+1)
+			unit_time[ut_idx] <= 7'd0;
+	end
 	
 	always @(posedge internal_clock or posedge reset) begin
 		if (reset) begin
-			hour 		<= 6'd0;
-			minute 	<= 6'd0;
-			second 	<= 6'd0;
-			m_sec 	<= 7'd0;
+			for (ut_idx = 0; ut_idx < 4; ut_idx = ut_idx+1) begin
+				unit_time[ut_idx] <= 7'd0;
+			end
 		end
 		else begin
-			m_sec <= m_sec + 7'd1;
+			unit_time[0] <= unit_time[0] + 7'd1;
 		
-			if (m_sec == 7'd100) begin
-				m_sec <= 7'd0;
-				second <= second + 6'd1;
+			if (unit_time[0] == 7'd100) begin
+				unit_time[0] <= 7'd0;
+				unit_time[1] <= unit_time[1] + 6'd1;
 			end
 		
-			if (second == 6'd60) begin 
-				second <= 6'd0;
-				minute <= minute + 6'd1;
+			if (unit_time[1] == 6'd60) begin 
+				unit_time[1] <= 6'd0;
+				unit_time[2] <= unit_time[2] + 6'd1;
 			end
 	
-			if (minute == 6'd60) begin
-				minute <= 6'd0;
-				hour <= hour + 6'd1;
+			if (unit_time[2] == 6'd60) begin
+				unit_time[2] <= 6'd0;
+				unit_time[3] <= unit_time[3] + 6'd1;
 			end
 	
-			if (hour == 6'd24) begin
-				hour <= 6'd0;
+			if (unit_time[3] == 6'd24) begin
+				unit_time[3] <= 6'd0;
 				// TODO: indicator for overflow
 			end
 		end
 	end
+	
+	// expand 2d array to 1d array
+	genvar ut_flat_idx;
+	generate
+		for (ut_flat_idx = 0; ut_flat_idx < 4; ut_flat_idx = ut_flat_idx+1) begin: ASSIGN_EPO
+			assign epoch[7*(ut_flat_idx+1)-1 -: 7] = unit_time[ut_flat_idx];
+		end
+	endgenerate
 	
 endmodule

@@ -19,10 +19,10 @@ module lcd_controller (
 	/*
 	 * LCM control states.
 	 */
-	parameter [1:0] 	IDLE			= 1'd0,
-							WRITE_START	= 1'd1,
-							WRITE_WAIT	= 1'd2,
-							WRITE_END	= 1'd3;
+	parameter [1:0] 	IDLE			= 2'd0,
+							WRITE_START	= 2'd1,
+							WRITE_WAIT	= 2'd2,
+							WRITE_END	= 2'd3;
 							
 	/*
 	 * Internal registers.
