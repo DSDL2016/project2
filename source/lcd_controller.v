@@ -16,6 +16,7 @@ module lcd_controller (
 	// divide the clock by 16
 	parameter clock_divider = 16;
 	
+	
 	/*
 	 * LCM control states.
 	 */
@@ -23,7 +24,8 @@ module lcd_controller (
 							WRITE_START	= 2'd1,
 							WRITE_WAIT	= 2'd2,
 							WRITE_END	= 2'd3;
-							
+				
+				
 	/*
 	 * Internal registers.
 	 */
@@ -31,12 +33,14 @@ module lcd_controller (
 	reg	[1:0]	state;
 	reg			pre_start, lcd_busy;
 
+	
 	/*
 	 * LCM low level control, write only.
 	 */
 	assign lcd_data = data;
 	assign lcd_rs	 = rs;
 	assign lcd_rw	 = 1'b0;
+	
 	
 	/*
 	 * LCM control sequence.

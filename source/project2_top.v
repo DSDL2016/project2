@@ -1,6 +1,7 @@
 module project2_top (
 	input				clock,
 	
+	
 	// buttons and indicators
 	input				start_pause_key,
 	output			start_pause_led,
@@ -16,12 +17,21 @@ module project2_top (
 	
 	output			timer_running,
 	
+	
 	// 7-segment displays
 	output	[6:0]	m_sec_1, m_sec_0,
 	output	[6:0]	second_1, second_0,
 	output	[6:0]	minute_1, minute_0,
 	output	[6:0]	hour_1, hour_0,
 	
+	
+	// lcd module interface
+	output	[7:0]	lcd_data,
+	output			lcd_rw, lcd_en, lcd_rs,
+	output			lcd_on, lcd_blon,
+	
+	
+	input				debug_sw,
 	output			debug_led
 );
 	
@@ -141,10 +151,30 @@ module project2_top (
 		end
 	endgenerate
 	
-	assign {m_sec_0, m_sec_1} 		= {seg_disp[M_SEC][0], seg_disp[M_SEC][1]};
+	assign {m_sec_0, m_sec_1} 		= {seg_disp[M_SEC][0], 	seg_disp[M_SEC][1]};
 	assign {second_0, second_1} 	= {seg_disp[SECOND][0], seg_disp[SECOND][1]};
 	assign {minute_0, minute_1} 	= {seg_disp[MINUTE][0], seg_disp[MINUTE][1]};
-	assign {hour_0, hour_1} 		= {seg_disp[HOUR][0], seg_disp[HOUR][1]};
+	assign {hour_0, hour_1} 		= {seg_disp[HOUR][0], 	seg_disp[HOUR][1]};
+	
+	
+	/*
+	 * LCM driver.
+	 */
+	lcd_bridge lcd_bridge (
+		.clock		(clock),
+		.reset		(debug_sw),
+		
+		// lcd module interface
+		.lcd_data	(lcd_data),
+		.lcd_rw		(lcd_rw),
+		.lcd_en		(lcd_en),
+		.lcd_rs		(lcd_rs)
+	);
+	
+	// default operation, permanent on.
+	assign lcd_on 		= 1'b1;
+	assign lcd_blon 	= 1'b1;
+	
 	
 	/*
 	 * Debug LED.
