@@ -1,41 +1,50 @@
 module debouncer(
-	input 		clock,
-	input 		PB,
-	output reg	PB_db
+	input 	clock,
+	input 	key_in,
+	input		active_low,
+	output	key_out
 );
+
+	reg	key_debounced;
+	
 	/*
 	 * Initial state..
 	 */
 	initial begin
-		PB_db = 1;
+		key_debounced = (active_low) ? 1'b1 : 1'b0;
 	end
 
 	/*
 	 * Synchronize the switch input to the clock.
 	 */
-	reg PB_sync_0;
+	reg key_sync_0;
 	always @(posedge clock) begin
-		PB_sync_0 <= PB; 
+		key_sync_0 <= key_in; 
 	end
 	
-	reg PB_sync_1;
+	reg key_sync_1;
 	always @(posedge clock) begin
-		PB_sync_1 <= PB_sync_0;
+		key_sync_1 <= key_sync_0;
 	end
 
 	/*
 	 * Debounce the switch.
 	 */
-	reg [15:0] PB_cnt;
+	reg [15:0] bounce_counter;
 	always @(posedge clock) begin
-		if (PB_db == PB_sync_1) begin
-			PB_cnt <= 0;
+		if (key_debounced == key_sync_1) begin
+			bounce_counter <= 0;
 		end
 		else begin
-			PB_cnt <= PB_cnt + 1'b1;  
-			if (PB_cnt == 16'hffff) 
-				PB_db <= ~PB_db;  
+			bounce_counter <= bounce_counter + 1'b1;  
+			if (bounce_counter == 16'hffff) 
+				key_debounced <= ~key_debounced;  
 		end
 	end
+	
+	/*
+	 * Assign the output accordingly.
+	 */
+	assign key_out = (active_low) ? ~key_debounced : key_debounced;
 	
 endmodule

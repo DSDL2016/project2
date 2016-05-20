@@ -1,11 +1,11 @@
 module bcd2seg (
 	input			[3:0]	bcd,
 	input					blank,
-	input					common_anode,
+	input					active_low,
 	output reg	[6:0]	seven_segment
 );
 
-	always @ (bcd or blank or common_anode) begin
+	always @ (bcd or blank or active_low) begin
 		seven_segment = 7'b000_0000 ;
 		case (bcd)
 			0: seven_segment = 7'b0111111;
@@ -21,7 +21,7 @@ module bcd2seg (
 			default: seven_segment = 7'b0000000;
 		endcase 
 		if (blank == 1'b1) 			seven_segment = 7'b0000000 ;
-		if (common_anode == 1'b1) 	seven_segment = ~seven_segment ;
+		if (active_low == 1'b1) 	seven_segment = ~seven_segment ;
 	end
 
 endmodule

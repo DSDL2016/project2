@@ -1,152 +1,154 @@
 module project2_top (
-	input				clock_50m,
+	input				clock,
 	
-	// buttons
-	input				start_pause_btn,
-	input				lap_btn,
-	input				reset_btn,
-	input				clear_btn,
+	// buttons and indicators
+	input				start_pause_key,
+	output			start_pause_led,
+	
+	input				lap_key,
+	output			lap_led,
+	
+	input				reset_key,
+	output			reset_led,
+	
+	input				clear_key,
+	output			clear_led,
+	
+	output			timer_running,
 	
 	// 7-segment displays
-	output	[6:0]	hour_hex1, hour_hex0,
-	output	[6:0]	minute_hex1, minute_hex0,
-	output	[6:0]	second_hex1, second_hex0,
-	output	[6:0]	m_sec_hex1, m_sec_hex0,
+	output	[6:0]	m_sec_1, m_sec_0,
+	output	[6:0]	second_1, second_0,
+	output	[6:0]	minute_1, minute_0,
+	output	[6:0]	hour_1, hour_0,
 	
-	output	[7*8-1:0]	hex,
-	
-	// led indicators
-	output			start_pause_ind, run_timer_ind,
-	output			reset_ind, reset_timer_ind,
-	
-	// lcd module interface
-	output	[7:0]	LCD_DATA,
-	output			LCD_RW, LCD_EN, LCD_RS, LCD_ON, LCD_BLON
+	output			debug_led
 );
 	
-	wire 				lcd_busy, reg_busy;
+	genvar i;
+	
 	
 	/*
-	 * Debounce the buttons.
+	 * Bundle the I/Os for easier operations later on.
 	 */
-	wire start_pause_neg, lap_neg, reset_neg, clear_neg;
+	wire	[3:0]	keys_nodb = { start_pause_key, lap_key, reset_key, clear_key };
+	wire	[3:0]	keys;
+	wire	[6:0]	seg_disp [0:3][0:1];
 	
-	debouncer start_pause_db (
-		.clock	(clock_50m), 
-		.PB		(start_pause_btn), 
-		.PB_db	(start_pause_neg)
-	);
-	
-	debouncer lap_db (
-		.clock	(clock_50m),
-		.PB		(lap_btn),
-		.PB_db	(lap_neg)
-	);
-	
-	debouncer reset_db (
-		.clock	(clock_50m),
-		.PB		(reset_btn),
-		.PB_db	(reset_neg)
-	);
-	
-	debouncer clear_db (
-		.clock	(clock_50m),
-		.PB		(clear_btn),
-		.PB_db	(clear_neg)
-	);
-	
-	wire start_pause = ~start_pause_neg;
-	wire lap = ~lap_neg;
-	wire reset = ~reset_neg;
-	wire clear = ~clear_neg;
-	
-	assign start_pause_ind = start_pause;
-	assign reset_ind = reset;
 	
 	/*
-	 * Key FSM.
+	 * Debouncers.
 	 */
-	wire run_timer, reset_timer;
+	generate
+		for (i = 0; i < 4; i = i+1) begin: DB_BTN
+			debouncer db_key (
+				.clock		(clock),
+				.key_in		(keys_nodb[i]),
+				.active_low	(1'b1),
+				.key_out		(keys[i])
+			);
+		end
+	endgenerate
 	
-	key_logic_fsm key_logic (
-		.clock			(clock_50m),
+	// preview the debounced output
+	assign {	start_pause_led, lap_led, reset_led, clear_led } = keys;
+	
+	
+	/*
+	 * State machine.
+	 */
+	wire	run_timer, reset_timer;
+	
+	key_logic_fsm fsm (
+		.clock			(clock),
 		.reset			(1'b0),
-		.k3				(start_pause),
-		.k1				(reset),
+		
+		// input from the keys
+		.k					(keys),
+		
+		// internal busy state
+		.lcd_busy		(1'b0),
+		.reg_busy		(reg_busy),
+		
+		// timer control
 		.run_timer		(run_timer),
 		.reset_timer	(reset_timer)
 	);
 	
-	assign run_timer_ind 	= run_timer;
-	assign reset_timer_ind 	= reset_timer;
+	assign timer_running = run_timer;
+	
 	
 	/*
-	 * Timer logic.
+	 * Internal timer logic.
 	 */
-	// 0: m_sec, second, minute, hour :3
-	wire	[6:0]			unit_time	[0:3];
+	// 4 time units: hour, minute, second, m_sec
+	localparam time_units = 4;
 	
-	stopwatch sw_timer (
-		.clock 	(clock_50m),
-		.run		(run_timer),
-		.reset	(reset_timer),
-		.epoch	(ut_flat)
+	wire	[7*time_units-1:0]	timestamp_flat;
+	wire								reg_busy;
+	
+	internal_timer timer (
+		.clock		(clock),
+		.run			(run_timer),
+		.reset		(reset_timer),
+		.timestamp	(timestamp_flat),
+		.reg_busy	(reg_busy)
 	);
 	
-	// collapse the 1d array to 2d array
-	wire	[7*4-1:0]	ut_flat;
-	genvar ut_flat_idx;
+	
+	/*
+	 * Expand the timestamp.
+	 */
+	wire	[6:0]	timestamp	[0:3];
+	parameter [1:0]	M_SEC		= 2'd0,
+							SECOND	= 2'd1,
+							MINUTE	= 2'd2,
+							HOUR		= 2'd3;
+							
 	generate
-		for (ut_flat_idx = 0; ut_flat_idx < 4; ut_flat_idx = ut_flat_idx+1) begin: ASSIGN_UT
-			assign unit_time[ut_flat_idx] = ut_flat[7*(ut_flat_idx+1)-1 -: 7];
+		for (i = 0; i < 4; i = i+1) begin: EXP_FLAT_TIMESTAMP
+			assign timestamp[i] = timestamp_flat[7*(i+1)-1 -: 7];
 		end
 	endgenerate
 	
+	
 	/*
-	 * 7-segment display.
+	 * 7-segment display conversions.
 	 */
-	wire	[3:0]	bcd_data	[0:3][0:1];
-
-	genvar ut_idx;
+	wire	[3:0]	bcd	[0:3][0:1];
+	
 	generate
-		for (ut_idx = 0; ut_idx < 4; ut_idx = ut_idx+1) begin: TIMER_BCD2SEG
-			bin2bcd time_to_digits (
-				.bin	(unit_time[ut_idx]),
-				.bcd1	(bcd_data[ut_idx][1]),
-				.bcd0	(bcd_data[ut_idx][0])
+		for (i = 0; i < 4; i = i+1) begin: SEG_CONV
+			bin2bcd conv_bin (
+				.bin	(timestamp[i]),
+				.bcd1	(bcd[i][1]),
+				.bcd0	(bcd[i][0])
 			);
 			
-			bcd2seg digit1_to_hex (
-				.bcd				(bcd_data[ut_idx][1]),
+			bcd2seg conv_bcd1 (
+				.bcd				(bcd[i][1]),
 				.blank			(1'b0),
-				.common_anode	(1'b1),
-				.seven_segment	()
+				.active_low		(1'b1),
+				.seven_segment	(seg_disp[i][1])
 			);
 			
-			bcd2seg digit0_to_hex (
-				.bcd				(bcd_data[ut_idx][0]),
+			bcd2seg conv_bcd0 (
+				.bcd				(bcd[i][0]),
 				.blank			(1'b0),
-				.common_anode	(1'b1),
-				.seven_segment	()
+				.active_low		(1'b1),
+				.seven_segment	(seg_disp[i][0])
 			);
 		end
 	endgenerate
 	
+	assign {m_sec_0, m_sec_1} 		= {seg_disp[M_SEC][0], seg_disp[M_SEC][1]};
+	assign {second_0, second_1} 	= {seg_disp[SECOND][0], seg_disp[SECOND][1]};
+	assign {minute_0, minute_1} 	= {seg_disp[MINUTE][0], seg_disp[MINUTE][1]};
+	assign {hour_0, hour_1} 		= {seg_disp[HOUR][0], seg_disp[HOUR][1]};
+	
 	/*
-	 * LCM driver.
+	 * Debug LED.
 	 */
-	assign LCD_ON		=	1'b1;
-	assign LCD_BLON	=	1'b1;
-
-	lcd_bridge lcd(
-		.iCLK		(clock_50m),
-		.iRST_N	(1'b1),
-		
-		// lcd module interface
-		.LCD_DATA	(LCD_DATA),
-		.LCD_RS		(LCD_RS),
-		.LCD_RW		(LCD_RW),
-		.LCD_EN		(LCD_EN)
-	);
+	assign debug_led = (keys == 8);
 	
 endmodule
