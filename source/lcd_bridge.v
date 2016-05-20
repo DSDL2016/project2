@@ -4,7 +4,7 @@ module lcd_bridge (
 	
 	// lcd module interface
 	output	[7:0]	lcd_data,
-	output			lcd_rw, lcd_en, lcd_rs
+	output	[4:0]	lcd_ctrl
 );
 
 	/*
@@ -95,7 +95,7 @@ module lcd_bridge (
 		LCD_INTIAL+3:	lut_data	<=	9'h006;	// cursor pos++, no screen shift
 		LCD_INTIAL+4:	lut_data	<=	9'h080;	// set DDRAM to 0x00 (1st line)
 		
-		//	Line 1
+		//	line 1
 		LCD_LINE1+0:	lut_data	<=	9'h120;	//	Welcome to the
 		LCD_LINE1+1:	lut_data	<=	9'h157;
 		LCD_LINE1+2:	lut_data	<=	9'h165;
@@ -112,9 +112,11 @@ module lcd_bridge (
 		LCD_LINE1+13:	lut_data	<=	9'h168;
 		LCD_LINE1+14:	lut_data	<=	9'h165;
 		LCD_LINE1+15:	lut_data	<=	9'h120;
-		//	Change Line
+		
+		//	change line
 		LCD_CH_LINE:	lut_data	<=	9'h0C0;	// set DDRAM to 0x40 (2nd line)
-		//	Line 2
+		
+		//	line 2
 		LCD_LINE2+0:	lut_data	<=	9'h141;	//	Altera DE2 Board
 		LCD_LINE2+1:	lut_data	<=	9'h16C;
 		LCD_LINE2+2:	lut_data	<=	9'h174;
@@ -131,6 +133,7 @@ module lcd_bridge (
 		LCD_LINE2+13:	lut_data	<=	9'h161;
 		LCD_LINE2+14:	lut_data	<=	9'h172;
 		LCD_LINE2+15:	lut_data	<=	9'h164;
+		
 		default:			lut_data	<=	9'h000;
 		endcase
 	end
@@ -144,10 +147,8 @@ module lcd_bridge (
 		.done			(reg_lcd_done),
 		
 		// lcd module interface
-		.lcd_data	(lcd_data),
-		.lcd_rs		(lcd_rs),
-		.lcd_rw		(lcd_rw),
-		.lcd_en		(lcd_en)
+		.lcd_data	(lcd_data_wire),
+		.lcd_ctrl	(lcd_ctrl_wire)
 	);
 
 endmodule

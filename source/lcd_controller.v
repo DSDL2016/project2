@@ -8,13 +8,18 @@ module lcd_controller (
 	
 	// lcd module interface
 	output		lcd_data,
-	output		lcd_rs,
-	output		lcd_rw,
-	output reg	lcd_en
+	output		lcd_ctrl
 );
 
 	// divide the clock by 16
 	parameter clock_divider = 16;
+	
+	
+	/*
+	 * Expand the I/O bundle.
+	 */
+	wire	lcd_rw, lcd_rs, lcd_on, lcd_blon;
+	assign lcd_ctrl = {lcd_rw, reg_lcd_en, lcd_rs, lcd_on, lcd_blon};
 	
 	
 	/*
@@ -32,6 +37,7 @@ module lcd_controller (
 	reg	[4:0]	clock_counter;
 	reg	[1:0]	state;
 	reg			pre_start, lcd_busy;
+	reg			reg_lcd_en;
 
 	
 	/*
@@ -41,13 +47,17 @@ module lcd_controller (
 	assign lcd_rs	 = rs;
 	assign lcd_rw	 = 1'b0;
 	
+	// default operation, permanent on.
+	assign lcd_on	 = 1'b1;
+	assign lcd_blon = 1'b1;
+	
 	
 	/*
 	 * LCM control sequence.
 	 */
 	initial begin
 		// bus state
-		lcd_en 			<= 1'b0;
+		reg_lcd_en 		<= 1'b0;
 		
 		// device state
 		pre_start 		<= 1'b0;
@@ -73,7 +83,7 @@ module lcd_controller (
 				end
 				
 				WRITE_START:	begin
-					lcd_en				<=	1'b1;
+					reg_lcd_en				<=	1'b1;
 					state					<=	WRITE_WAIT;
 				end
 				
@@ -86,7 +96,7 @@ module lcd_controller (
 				
 				WRITE_END:	begin
 					// bus state
-					lcd_en				<=	1'b0;
+					reg_lcd_en				<=	1'b0;
 					
 					// device state
 					lcd_busy				<=	1'b0;

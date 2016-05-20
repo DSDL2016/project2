@@ -160,20 +160,20 @@ module project2_top (
 	/*
 	 * LCM driver.
 	 */
+	wire	[7:0]	lcd_data_wire;
+	wire	[4:0]	lcd_ctrl_wire;
+	
+	assign lcd_data = lcd_data_wire;
+	assign {lcd_rw, lcd_en, lcd_rs, lcd_on, lcd_blon} = lcd_ctrl_wire;
+	
 	lcd_bridge lcd_bridge (
 		.clock		(clock),
 		.reset		(debug_sw),
 		
 		// lcd module interface
-		.lcd_data	(lcd_data),
-		.lcd_rw		(lcd_rw),
-		.lcd_en		(lcd_en),
-		.lcd_rs		(lcd_rs)
+		.lcd_data	(lcd_data_wire),
+		.lcd_ctrl	(lcd_ctrl_wire)
 	);
-	
-	// default operation, permanent on.
-	assign lcd_on 		= 1'b1;
-	assign lcd_blon 	= 1'b1;
 	
 	
 	/*
