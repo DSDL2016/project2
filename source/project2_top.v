@@ -16,6 +16,7 @@ module project2_top (
 	output			clear_led,
 	
 	output			timer_running,
+	output			lcd_updating,
 	
 	
 	// 7-segment displays
@@ -39,11 +40,22 @@ module project2_top (
 	
 	
 	/*
-	 * Bundle the I/Os for easier operations later on.
+	 * Internal wires and registers.
 	 */
+	wire	wire_global_reset;
+	
 	wire	[3:0]	keys_nodb = { start_pause_key, lap_key, reset_key, clear_key };
 	wire	[3:0]	keys;
 	wire	[6:0]	seg_disp [0:3][0:1];
+	
+	
+	/*
+	 * Global reset generation.
+	 */
+	reset_gen r0 (
+		.clock	(clock),
+		.reset	(wire_global_reset)
+	);
 	
 	
 	/*
@@ -68,6 +80,9 @@ module project2_top (
 	 * State machine.
 	 */
 	wire	run_timer, reset_timer;
+	wire	insert_value, clear_value;
+	
+	wire	timer_busy_wire;
 	
 	key_logic_fsm fsm (
 		.clock			(clock),
@@ -77,12 +92,16 @@ module project2_top (
 		.k					(keys),
 		
 		// internal busy state
-		.lcd_busy		(1'b0),
-		.reg_busy		(reg_busy),
+		.lcd_busy		(lcd_busy),
+		.reg_busy		(timer_busy_wire),
 		
 		// timer control
 		.run_timer		(run_timer),
-		.reset_timer	(reset_timer)
+		.reset_timer	(reset_timer),
+		
+		// lcd control
+		.insert_value	(insert_value),
+		.clear_value	(clear_value)
 	);
 	
 	assign timer_running = run_timer;
@@ -95,14 +114,13 @@ module project2_top (
 	localparam time_units = 4;
 	
 	wire	[7*time_units-1:0]	timestamp_flat;
-	wire								reg_busy;
 	
 	internal_timer timer (
 		.clock		(clock),
 		.run			(run_timer),
 		.reset		(reset_timer),
 		.timestamp	(timestamp_flat),
-		.reg_busy	(reg_busy)
+		.reg_busy	(timer_busy_wire)
 	);
 	
 	
@@ -158,6 +176,17 @@ module project2_top (
 	
 	
 	/*
+	 * Flatten the BCD representations.
+	 */
+	wire	[2*4*4-1:0]	flat_bcd;
+	generate
+		for (i = 0; i < 4; i = i+1) begin: FLAT_BCD
+			assign flat_bcd[8*i +: 8] = {bcd[3-i][0], bcd[3-i][1]};
+		end
+	endgenerate
+	
+	
+	/*
 	 * LCM driver.
 	 */
 	wire	[7:0]	lcd_data_wire;
@@ -168,17 +197,25 @@ module project2_top (
 	
 	lcd_bridge lcd_bridge (
 		.clock		(clock),
-		.reset		(debug_sw),
+		.reset		(wire_global_reset),
 		
+		.insert		(insert_value),
+		.new_record	(flat_bcd),
+		.clear		(clear_value),
+		
+		.busy			(lcd_busy),
+
 		// lcd module interface
 		.lcd_data	(lcd_data_wire),
 		.lcd_ctrl	(lcd_ctrl_wire)
 	);
 	
+	assign lcd_updating = lcd_busy;
 	
 	/*
 	 * Debug LED.
 	 */
-	assign debug_led = (keys == 8);
+	//assign lcd_busy = debug_sw;
+	//assign debug_led = ;
 	
 endmodule

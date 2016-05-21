@@ -66,16 +66,6 @@ set_location_assignment PIN_Y18 -to start_pause_led
 set_location_assignment PIN_N2 -to clock
 set_location_assignment PIN_AA20 -to timer_running
 set_location_assignment PIN_Y12 -to debug_led
-set_global_assignment -name SYSTEMVERILOG_FILE source/internal_timer.sv
-set_global_assignment -name VERILOG_FILE fsm/key_logic_fsm.v
-set_global_assignment -name SMF_FILE fsm/key_logic_fsm.smf
-set_global_assignment -name VERILOG_FILE source/project2_top.v
-set_global_assignment -name VERILOG_FILE source/bin2bcd.v
-set_global_assignment -name VERILOG_FILE source/bcd2seg.v
-set_global_assignment -name VERILOG_FILE source/debouncer.v
-set_global_assignment -name VERILOG_FILE source/lcd_controller.v
-set_global_assignment -name VERILOG_FILE source/lcd_bridge.v
-set_global_assignment -name VERILOG_FILE source/freq_100hz.v
 set_location_assignment PIN_M4 -to hour_0[6]
 set_location_assignment PIN_M5 -to hour_0[5]
 set_location_assignment PIN_M3 -to hour_0[4]
@@ -146,4 +136,23 @@ set_location_assignment PIN_K4 -to lcd_rw
 set_location_assignment PIN_K2 -to lcd_blon
 set_location_assignment PIN_L4 -to lcd_on
 set_location_assignment PIN_V2 -to debug_sw
+set_global_assignment -name EDA_TIME_SCALE "1 ns" -section_id eda_simulation
+set_global_assignment -name EDA_TEST_BENCH_ENABLE_STATUS TEST_BENCH_MODE -section_id eda_simulation
+set_global_assignment -name EDA_NATIVELINK_SIMULATION_TEST_BENCH "Debug Test" -section_id eda_simulation
+set_global_assignment -name EDA_TEST_BENCH_NAME "Debug Test" -section_id eda_simulation
+set_global_assignment -name EDA_DESIGN_INSTANCE_NAME NA -section_id "Debug Test"
+set_global_assignment -name EDA_TEST_BENCH_MODULE_NAME testbench -section_id "Debug Test"
+set_global_assignment -name EDA_TEST_BENCH_FILE source/testbench.v -section_id "Debug Test"
+set_global_assignment -name VERILOG_FILE source/reset_gen.v
+set_global_assignment -name SYSTEMVERILOG_FILE source/internal_timer.sv
+set_global_assignment -name VERILOG_FILE fsm/key_logic_fsm.v
+set_global_assignment -name SMF_FILE fsm/key_logic_fsm.smf
+set_global_assignment -name VERILOG_FILE source/project2_top.v
+set_global_assignment -name VERILOG_FILE source/bin2bcd.v
+set_global_assignment -name VERILOG_FILE source/bcd2seg.v
+set_global_assignment -name VERILOG_FILE source/debouncer.v
+set_global_assignment -name VERILOG_FILE source/lcd_controller.v
+set_global_assignment -name VERILOG_FILE source/lcd_bridge.v
+set_global_assignment -name VERILOG_FILE source/freq_100hz.v
+set_location_assignment PIN_U18 -to lcd_updating
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

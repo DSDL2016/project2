@@ -8,3 +8,6 @@ build/
 
 # backups
 *.bak
+
+# report
+*.rpt

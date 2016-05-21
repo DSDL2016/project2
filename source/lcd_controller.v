@@ -1,111 +1,88 @@
 module lcd_controller (
-	// host side interface
-	input 		clock,
-	input	[7:0]	data,
-	input			rs,
-	input			start,
-	output reg	done,
+	input					clock,
+	input					reset,
+	input			[7:0]	data,
+	input					rs,
+	input					write_start,
+	output reg			lcd_done,
 	
-	// lcd module interface
-	output		lcd_data,
-	output		lcd_ctrl
+	//	LCD interface
+	output		[7:0]	lcd_data,
+	output		[4:0]	lcd_ctrl
 );
-
-	// divide the clock by 16
-	parameter clock_divider = 16;
+	
+	// 50MHz has 20ns pulse width
+	// LCD requires minimum of 230ns, 16 * 20ns = 320ns
+	parameter	SUSTAINED_PULSES	=	16;
 	
 	
-	/*
-	 * Expand the I/O bundle.
-	 */
-	wire	lcd_rw, lcd_rs, lcd_on, lcd_blon;
-	assign lcd_ctrl = {lcd_rw, reg_lcd_en, lcd_rs, lcd_on, lcd_blon};
-	
-	
-	/*
-	 * LCM control states.
-	 */
-	parameter [1:0] 	IDLE			= 2'd0,
-							WRITE_START	= 2'd1,
-							WRITE_WAIT	= 2'd2,
-							WRITE_END	= 2'd3;
-				
-				
 	/*
 	 * Internal registers.
 	 */
-	reg	[4:0]	clock_counter;
-	reg	[1:0]	state;
-	reg			pre_start, lcd_busy;
-	reg			reg_lcd_en;
+	reg		[4:0]	pulse_counter;
+	reg		[1:0]	state;
+	reg				reg_pre_start, reg_start;
+	reg				reg_lcd_en;
+	
 
-	
-	/*
-	 * LCM low level control, write only.
-	 */
-	assign lcd_data = data;
-	assign lcd_rs	 = rs;
-	assign lcd_rw	 = 1'b0;
-	
-	// default operation, permanent on.
-	assign lcd_on	 = 1'b1;
-	assign lcd_blon = 1'b1;
+	assign	lcd_data	=	data;
+	// RW, EN, RS, ON, BLON
+	// only write to LCD, so RW=0
+	assign	lcd_ctrl = {1'b0, reg_lcd_en, rs, 1'b1, 1'b1};
 	
 	
 	/*
-	 * LCM control sequence.
+	 * FSM state definitions.
 	 */
-	initial begin
-		// bus state
-		reg_lcd_en 		<= 1'b0;
-		
-		// device state
-		pre_start 		<= 1'b0;
-		lcd_busy			<=	1'b0;
-		done 				<= 1'b0;
-		
-		clock_counter	<=	1'b0;
-		state				<=	IDLE;
-	end
-	
-	always @(posedge clock) begin
-		// detect start trigger
-		pre_start <= start;
-		if ({pre_start, start} == 2'b01) begin
-			lcd_busy	<=	1'b1;
-			done		<=	1'b0;
+	parameter	[1:0]	WAIT			= 2'd0,
+							BEGIN			= 2'd1,
+							HOLD_DATA	= 2'd2,
+							END			= 2'd3;
+							
+	always@(posedge clock or negedge reset) begin
+		if (!reset) begin
+			lcd_done			<=	1'b0;
+			reg_lcd_en		<=	1'b0;
+			reg_pre_start	<=	1'b0;
+			reg_start		<=	1'b0;
+			pulse_counter	<=	5'd0;
+			state				<=	WAIT;
 		end
-		
-		if (lcd_busy) begin
-			case(state)
-				IDLE:	begin
-					state					<=	WRITE_START;
+		else begin
+			//////	Input Start Detect ///////
+			reg_pre_start <= write_start;
+			if ({reg_pre_start,write_start} == 2'b01) begin
+				reg_start	<=	1'b1;
+				lcd_done		<=	1'b0;
+			end
+			//////////////////////////////////
+			if (reg_start) begin
+				case(state)
+				WAIT:	begin
+					state	<=	BEGIN;
 				end
 				
-				WRITE_START:	begin
-					reg_lcd_en				<=	1'b1;
-					state					<=	WRITE_WAIT;
+				BEGIN: begin
+					reg_lcd_en	<=	1'b1;
+					state			<=	HOLD_DATA;
 				end
 				
-				WRITE_WAIT:	begin			
-					if(clock_counter < clock_divider)
-						clock_counter	<= clock_counter+1;
+				HOLD_DATA:	begin					
+					if(pulse_counter < SUSTAINED_PULSES)
+						pulse_counter	<=	pulse_counter+5'd1;
 					else
-						state				<=	WRITE_END;
+						state				<=	END;
 				end
 				
-				WRITE_END:	begin
-					// bus state
-					reg_lcd_en				<=	1'b0;
-					
-					// device state
-					lcd_busy				<=	1'b0;
-					done					<=	1'b1;
-					
-					clock_counter		<=	5'd0;
-					state					<=	IDLE;
+				END:	begin
+					reg_lcd_en		<=	1'b0;
+					reg_start		<=	1'b0;
+					lcd_done			<=	1'b1;
+					pulse_counter	<=	0;
+					state				<=	WAIT;
 				end
-			endcase
+				endcase
+			end
 		end
 	end
 
