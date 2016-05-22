@@ -33,8 +33,11 @@ module project2_top (
 	
 	
 	input				debug_sw,
-	output			debug_led
+	output			debug_led,
+	
+	output [10:0] ledr
 );
+   
 	
 	genvar i;
 	
@@ -143,6 +146,7 @@ module project2_top (
 	/*
 	 * 7-segment display conversions.
 	 */
+	 
 	wire	[3:0]	bcd	[0:3][0:1];
 	
 	generate
@@ -174,10 +178,22 @@ module project2_top (
 	assign {minute_0, minute_1} 	= {seg_disp[MINUTE][0], seg_disp[MINUTE][1]};
 	assign {hour_0, hour_1} 		= {seg_disp[HOUR][0], 	seg_disp[HOUR][1]};
 	
+	/*
+	 * Marquee Blinker LED Red 
+	 */
+	generate 
+	   for (i = 0; i < 10; i = i+1) begin: MARQUEE
+			assign ledr[i] = (bcd[0][1] == i && ~ bcd[1][0][0]) || (bcd[0][1] == (10 - i) && bcd[1][0][0]);
+		end
+	endgenerate
+	
+	assign ledr[10] =(bcd[0][1] == 4'd0 &&  bcd[1][0][0]);
+	
 	
 	/*
 	 * Flatten the BCD representations.
 	 */
+	 
 	wire	[2*4*4-1:0]	flat_bcd;
 	generate
 		for (i = 0; i < 4; i = i+1) begin: FLAT_BCD

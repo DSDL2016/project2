@@ -155,4 +155,15 @@ set_global_assignment -name VERILOG_FILE source/lcd_controller.v
 set_global_assignment -name VERILOG_FILE source/lcd_bridge.v
 set_global_assignment -name VERILOG_FILE source/freq_100hz.v
 set_location_assignment PIN_U18 -to lcd_updating
+set_location_assignment PIN_AE23 -to ledr[0]
+set_location_assignment PIN_AF23 -to ledr[1]
+set_location_assignment PIN_AB21 -to ledr[2]
+set_location_assignment PIN_AC22 -to ledr[3]
+set_location_assignment PIN_AD22 -to ledr[4]
+set_location_assignment PIN_AD23 -to ledr[5]
+set_location_assignment PIN_AD21 -to ledr[6]
+set_location_assignment PIN_AC21 -to ledr[7]
+set_location_assignment PIN_AA14 -to ledr[8]
+set_location_assignment PIN_Y13 -to ledr[9]
+set_location_assignment PIN_AA13 -to ledr[10]
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
