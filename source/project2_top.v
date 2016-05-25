@@ -1,5 +1,27 @@
 module project2_top (
-	input				clock,
+   input				_CLOCK_27,
+	input				_CLOCK_50,
+	
+	input 			switch_string_wav,
+	output			led_switch_string_wav,
+	input 			switch_reset,
+	output			led_switch_reset,
+	input 			switch_mute,	
+	output			led_switch_mute,
+	input 			switch_ticking_sound,
+	output			led_switch_ticking_sound,
+	
+	inout				_I2C_SDAT,				//	I2C Data
+	output			_I2C_SCLK,				//	I2C Clock
+	
+	inout				_AUD_ADCLRCK,			//	Audio CODEC ADC LR Clock
+	inout				_AUD_DACLRCK,			//	Audio CODEC DAC LR Clock
+	input				_AUD_ADCDAT,			    //	Audio CODEC ADC Data
+	output			_AUD_DACDAT,				//	Audio CODEC DAC Data
+	inout				_AUD_BCLK,				//	Audio CODEC Bit-Stream Clock
+	output			_AUD_XCK,				//	Audio CODEC Chip Clock
+
+	output			_TD_RESET,				//	TV Decoder Reset
 	
 	
 	// buttons and indicators
@@ -31,16 +53,11 @@ module project2_top (
 	output			lcd_rw, lcd_en, lcd_rs,
 	output			lcd_on, lcd_blon,
 	
-	
-	input				debug_sw,
-	output			debug_led,
-	
 	output [10:0] ledr
 );
    
 	
 	genvar i;
-	
 	
 	/*
 	 * Internal wires and registers.
@@ -56,7 +73,7 @@ module project2_top (
 	 * Global reset generation.
 	 */
 	reset_gen r0 (
-		.clock	(clock),
+		.clock	(_CLOCK_50),
 		.reset	(wire_global_reset)
 	);
 	
@@ -67,7 +84,7 @@ module project2_top (
 	generate
 		for (i = 0; i < 4; i = i+1) begin: DB_BTN
 			debouncer db_key (
-				.clock		(clock),
+				.clock		(_CLOCK_50),
 				.key_in		(keys_nodb[i]),
 				.active_low	(1'b1),
 				.key_out		(keys[i])
@@ -77,6 +94,11 @@ module project2_top (
 	
 	// preview the debounced output
 	assign {	start_pause_led, lap_led, reset_led, clear_led } = keys;
+	
+	// preview the switch output
+	assign { led_switch_ticking_sound, led_switch_string_wav, led_switch_reset, led_switch_mute }
+			= { switch_ticking_sound, switch_string_wav, switch_reset, switch_mute};	
+				
 	
 	
 	/*
@@ -88,7 +110,7 @@ module project2_top (
 	wire	timer_busy_wire;
 	
 	key_logic_fsm fsm (
-		.clock			(clock),
+		.clock			(_CLOCK_50),
 		.reset			(1'b0),
 		
 		// input from the keys
@@ -119,7 +141,7 @@ module project2_top (
 	wire	[7*time_units-1:0]	timestamp_flat;
 	
 	internal_timer timer (
-		.clock		(clock),
+		.clock		(_CLOCK_50),
 		.run			(run_timer),
 		.reset		(reset_timer),
 		.timestamp	(timestamp_flat),
@@ -212,7 +234,7 @@ module project2_top (
 	assign {lcd_rw, lcd_en, lcd_rs, lcd_on, lcd_blon} = lcd_ctrl_wire;
 	
 	lcd_bridge lcd_bridge (
-		.clock		(clock),
+		.clock		(_CLOCK_50),
 		.reset		(wire_global_reset),
 		
 		.insert		(insert_value),
@@ -228,10 +250,31 @@ module project2_top (
 	
 	assign lcd_updating = lcd_busy;
 	
-	/*
-	 * Debug LED.
-	 */
-	//assign lcd_busy = debug_sw;
-	//assign debug_led = ;
+	wire is_1sec = (bcd[0][1] == 4'b0000) && timer_running && switch_ticking_sound;
+	
+	DE2_synthesizer synthesizer (	 
+		.CLOCK_27 (_CLOCK_27),							
+		.CLOCK_50 (_CLOCK_50),											
+		////////////////////	Push Button		////////////////////
+		.START_KEY ( start_pause_key & lap_key & reset_key & clear_key & ~is_1sec),							
+		////////////////////	DPDT Switch		////////////////////
+		.SW_STRING (switch_string_wav),
+		.SW_RESET (switch_reset),
+		.SW_MUTE (switch_mute),						
+		////////////////////	I2C		////////////////////////////
+		.I2C_SDAT (_I2C_SDAT),					
+		.I2C_SCLK (_I2C_SCLK),						
+		
+	
+		////////////////	Audio CODEC		////////////////////////
+		.AUD_ADCLRCK (_AUD_ADCLRCK),				
+		.AUD_ADCDAT (_AUD_ADCDAT),						
+		.AUD_DACLRCK (_AUD_DACLRCK),				
+		.AUD_DACDAT (_AUD_DACDAT),						
+		.AUD_BCLK (_AUD_BCLK),						
+		.AUD_XCK (_AUD_XCK),						
+		.TD_RESET (_TD_RESET)						
+	);
+	
 	
 endmodule
