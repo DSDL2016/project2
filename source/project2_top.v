@@ -4,10 +4,10 @@ module project2_top (
 	
 	input 			switch_string_wav,
 	output			led_switch_string_wav,
-	input 			switch_reset,
-	output			led_switch_reset,
 	input 			switch_mute,	
 	output			led_switch_mute,
+	input 			switch_marquee,
+	output			led_switch_marquee,
 	input 			switch_ticking_sound,
 	output			led_switch_ticking_sound,
 	
@@ -96,8 +96,8 @@ module project2_top (
 	assign {	start_pause_led, lap_led, reset_led, clear_led } = keys;
 	
 	// preview the switch output
-	assign { led_switch_ticking_sound, led_switch_string_wav, led_switch_reset, led_switch_mute }
-			= { switch_ticking_sound, switch_string_wav, switch_reset, switch_mute};	
+	assign { led_switch_marquee, led_switch_ticking_sound, led_switch_string_wav, led_switch_mute }
+			= { switch_marquee, switch_ticking_sound, switch_string_wav, switch_mute};	
 				
 	
 	
@@ -205,11 +205,12 @@ module project2_top (
 	 */
 	generate 
 	   for (i = 0; i < 10; i = i+1) begin: MARQUEE
-			assign ledr[i] = (bcd[0][1] == i && ~ bcd[1][0][0]) || (bcd[0][1] == (10 - i) && bcd[1][0][0]);
+			assign ledr[i] = switch_marquee & 
+								((bcd[0][1] == i && ~ bcd[1][0][0]) || (bcd[0][1] == (10 - i) && bcd[1][0][0]));
 		end
 	endgenerate
 	
-	assign ledr[10] =(bcd[0][1] == 4'd0 &&  bcd[1][0][0]);
+	assign ledr[10] = switch_marquee & (bcd[0][1] == 4'd0 &&  bcd[1][0][0]);
 	
 	
 	/*
@@ -256,10 +257,10 @@ module project2_top (
 		.CLOCK_27 (_CLOCK_27),							
 		.CLOCK_50 (_CLOCK_50),											
 		////////////////////	Push Button		////////////////////
-		.START_KEY ( start_pause_key & lap_key & reset_key & clear_key & ~is_1sec),							
+		.START_KEY1 ( start_pause_key & lap_key & reset_key & ~is_1sec),
+		.START_KEY2 ( clear_key ),			
 		////////////////////	DPDT Switch		////////////////////
 		.SW_STRING (switch_string_wav),
-		.SW_RESET (switch_reset),
 		.SW_MUTE (switch_mute),						
 		////////////////////	I2C		////////////////////////////
 		.I2C_SDAT (_I2C_SDAT),					

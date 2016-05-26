@@ -62,10 +62,10 @@ module DE2_synthesizer (
 		CLOCK_27,							//	27 MHz
 		CLOCK_50,							//	50 MHz
 		////////////////////	Push Button		////////////////////
-		START_KEY,							
+		START_KEY1,
+		START_KEY2,			
 		////////////////////	DPDT Switch		////////////////////
 		SW_STRING,
-		SW_RESET,
 		SW_MUTE,		
 		////////////////////	I2C		////////////////////////////
 		I2C_SDAT,						//	I2C Data
@@ -86,10 +86,10 @@ module DE2_synthesizer (
 	input			CLOCK_27;					//	27 MHz
 	input			CLOCK_50;					//	50 MHz
 ////////////////////////	Push Button		////////////////////////
-	input			START_KEY;					
+	input			START_KEY1;
+	input			START_KEY2;	
 ////////////////////////	DPDT Switch		////////////////////////
 	input 		SW_STRING;
-	input 		SW_RESET;
 	input 		SW_MUTE;
 ////////////////////////	I2C		////////////////////////////////
 	inout			I2C_SDAT;				//	I2C Data
@@ -117,7 +117,7 @@ module DE2_synthesizer (
 	
 	I2C_AV_Config 		u7	(	//	Host Side
 								.iCLK		( CLOCK_50 ),
-								.iRST_N		( ~SW_RESET ),
+								.iRST_N		( 1'b1 ),
 								.o_I2C_END	( I2C_END ),
 								//	I2C Side
 								.I2C_SCLK	( I2C_SCLK ),
@@ -170,18 +170,18 @@ module DE2_synthesizer (
 	wire [7:0]demo_code2;
 	
 	wire [7:0]demo_code;
-	assign demo_code = demo_code2;
+	assign demo_code = (START_KEY1 == 1'b0) ? demo_code1 : demo_code2;
 
-	demo_sound1	dd1(
+	demo_sound1	ticking1(
 		.clock   ( demo_clock1 ),
 		.key_code( demo_code1 ),
-		.k_tr    ( START_KEY )
+		.k_tr    ( START_KEY1 )
 	);
 	
-	demo_sound2	dd2(
+	demo_sound2	johncena(
 		.clock   ( demo_clock2 ),
 		.key_code( demo_code2 ),
-		.k_tr    ( START_KEY )
+		.k_tr    ( START_KEY2 )
 	);
 
 ////////////Sound Select/////////////	
@@ -222,7 +222,7 @@ module DE2_synthesizer (
 		
 		// KEY //
 		
-		.iRST_N( ~SW_RESET ),							
+		.iRST_N( 1'b1 ),							
 		.iSrc_Select( 2'b00 ),
 
 		// Sound Control //

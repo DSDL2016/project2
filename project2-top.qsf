@@ -67,10 +67,8 @@ set_location_assignment PIN_B6 -to _I2C_SDAT
 set_location_assignment PIN_D13 -to _CLOCK_27
 set_location_assignment PIN_N2 -to _CLOCK_50
 set_location_assignment PIN_U4 -to switch_string_wav
-set_location_assignment PIN_V1 -to switch_reset
 set_location_assignment PIN_V2 -to switch_mute
 set_location_assignment PIN_AE13 -to led_switch_string_wav
-set_location_assignment PIN_AE12 -to led_switch_reset
 set_location_assignment PIN_AD12 -to led_switch_mute
 set_location_assignment PIN_W26 -to start_pause_key
 set_location_assignment PIN_P23 -to lap_key
@@ -196,4 +194,6 @@ set_global_assignment -name VERILOG_FILE source/debouncer.v
 set_global_assignment -name VERILOG_FILE source/lcd_controller.v
 set_global_assignment -name VERILOG_FILE source/lcd_bridge.v
 set_global_assignment -name VERILOG_FILE source/freq_100hz.v
+set_location_assignment PIN_V1 -to switch_marquee
+set_location_assignment PIN_AE12 -to led_switch_marquee
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
