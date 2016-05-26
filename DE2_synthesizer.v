@@ -156,8 +156,8 @@ module DE2_synthesizer (
 
 	wire   keyboard_sysclk = VGA_CLK_o[11];
 
-	//wire   demo_clock      = VGA_CLK_o[18]; 
-	wire   demo_clock      = VGA_CLK_o[18]; 
+	wire   demo_clock1      = VGA_CLK_o[10]; 
+	wire   demo_clock2      = VGA_CLK_o[18]; 
 
 	always @( posedge CLOCK_50 ) VGA_CLK_o = VGA_CLK_o + 1;
 		
@@ -167,26 +167,22 @@ module DE2_synthesizer (
 // DEMO Sound (CH1) //
 
 	wire [7:0]demo_code1;
+	wire [7:0]demo_code2;
+	
+	wire [7:0]demo_code;
+	assign demo_code = demo_code2;
 
 	demo_sound1	dd1(
-		.clock   ( demo_clock ),
+		.clock   ( demo_clock1 ),
 		.key_code( demo_code1 ),
 		.k_tr    ( START_KEY )
 	);
-
-// KeyBoard Scan //
-
-	wire [7:0]scan_code;
-
-	wire get_gate;
-
-	wire key1_on;
-
-	wire key2_on;
-
-	wire [7:0]key1_code;
-
-	wire [7:0]key2_code;
+	
+	demo_sound2	dd2(
+		.clock   ( demo_clock2 ),
+		.key_code( demo_code2 ),
+		.k_tr    ( START_KEY )
+	);
 
 ////////////Sound Select/////////////	
 
@@ -200,7 +196,7 @@ module DE2_synthesizer (
 		
 		// Key code-in //
 		
-		.scan_code1( demo_code1 ),
+		.scan_code1( demo_code ),
 		//Sound Output to Audio Generater//
 		
 		.sound1( sound1 ),
