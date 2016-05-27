@@ -66,9 +66,9 @@ set_location_assignment PIN_A6 -to _I2C_SCLK
 set_location_assignment PIN_B6 -to _I2C_SDAT
 set_location_assignment PIN_D13 -to _CLOCK_27
 set_location_assignment PIN_N2 -to _CLOCK_50
-set_location_assignment PIN_U4 -to switch_string_wav
+set_location_assignment PIN_V1 -to switch_marquee
+set_location_assignment PIN_AE12 -to led_switch_marquee
 set_location_assignment PIN_V2 -to switch_mute
-set_location_assignment PIN_AE13 -to led_switch_string_wav
 set_location_assignment PIN_AD12 -to led_switch_mute
 set_location_assignment PIN_W26 -to start_pause_key
 set_location_assignment PIN_P23 -to lap_key
@@ -159,30 +159,29 @@ set_global_assignment -name EDA_DESIGN_INSTANCE_NAME NA -section_id "Debug Test"
 set_global_assignment -name EDA_TEST_BENCH_MODULE_NAME testbench -section_id "Debug Test"
 set_global_assignment -name EDA_TEST_BENCH_FILE source/testbench.v -section_id "Debug Test"
 set_location_assignment PIN_U18 -to lcd_updating
-set_location_assignment PIN_AE23 -to ledr[0]
-set_location_assignment PIN_AF23 -to ledr[1]
-set_location_assignment PIN_AB21 -to ledr[2]
-set_location_assignment PIN_AC22 -to ledr[3]
-set_location_assignment PIN_AD22 -to ledr[4]
-set_location_assignment PIN_AD23 -to ledr[5]
-set_location_assignment PIN_AD21 -to ledr[6]
-set_location_assignment PIN_AC21 -to ledr[7]
-set_location_assignment PIN_AA14 -to ledr[8]
-set_location_assignment PIN_Y13 -to ledr[9]
-set_location_assignment PIN_AA13 -to ledr[10]
+set_location_assignment PIN_AE23 -to marquee_led[0]
+set_location_assignment PIN_AF23 -to marquee_led[1]
+set_location_assignment PIN_AB21 -to marquee_led[2]
+set_location_assignment PIN_AC22 -to marquee_led[3]
+set_location_assignment PIN_AD22 -to marquee_led[4]
+set_location_assignment PIN_AD23 -to marquee_led[5]
+set_location_assignment PIN_AD21 -to marquee_led[6]
+set_location_assignment PIN_AC21 -to marquee_led[7]
+set_location_assignment PIN_AA14 -to marquee_led[8]
+set_location_assignment PIN_Y13 -to marquee_led[9]
+set_location_assignment PIN_AA13 -to marquee_led[10]
 
-set_location_assignment PIN_U3 -to switch_ticking_sound
-set_location_assignment PIN_AF13 -to led_switch_ticking_sound
-set_global_assignment -name VERILOG_FILE demo_sound2.v
-set_global_assignment -name VERILOG_FILE wave_gen_string.v
-set_global_assignment -name VERILOG_FILE wave_gen_brass.v
-set_global_assignment -name VERILOG_FILE VGA_Audio_PLL.v
-set_global_assignment -name VERILOG_FILE staff.v
-set_global_assignment -name VERILOG_FILE I2C_Controller.v
-set_global_assignment -name VERILOG_FILE I2C_AV_Config.v
-set_global_assignment -name VERILOG_FILE demo_sound1.v
-set_global_assignment -name VERILOG_FILE adio_codec.v
-set_global_assignment -name VERILOG_FILE DE2_synthesizer.v
+set_location_assignment PIN_U4 -to switch_ticking_sound
+set_location_assignment PIN_AE13 -to led_switch_ticking_sound
+set_global_assignment -name VERILOG_FILE source/synthesizer/wave_gen_string.v
+set_global_assignment -name VERILOG_FILE source/synthesizer/VGA_Audio_PLL.v
+set_global_assignment -name VERILOG_FILE source/synthesizer/staff.v
+set_global_assignment -name VERILOG_FILE source/synthesizer/I2C_Controller.v
+set_global_assignment -name VERILOG_FILE source/synthesizer/I2C_AV_Config.v
+set_global_assignment -name VERILOG_FILE source/synthesizer/demo_sound2.v
+set_global_assignment -name VERILOG_FILE source/synthesizer/demo_sound1.v
+set_global_assignment -name VERILOG_FILE source/synthesizer/DE2_synthesizer.v
+set_global_assignment -name VERILOG_FILE source/synthesizer/adio_codec.v
 set_global_assignment -name VERILOG_FILE source/reset_gen.v
 set_global_assignment -name SYSTEMVERILOG_FILE source/internal_timer.sv
 set_global_assignment -name VERILOG_FILE fsm/key_logic_fsm.v
@@ -194,6 +193,5 @@ set_global_assignment -name VERILOG_FILE source/debouncer.v
 set_global_assignment -name VERILOG_FILE source/lcd_controller.v
 set_global_assignment -name VERILOG_FILE source/lcd_bridge.v
 set_global_assignment -name VERILOG_FILE source/freq_100hz.v
-set_location_assignment PIN_V1 -to switch_marquee
-set_location_assignment PIN_AE12 -to led_switch_marquee
+
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
