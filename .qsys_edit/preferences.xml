@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<preferences>
+ <debug showDebugMenu="0" />
+ <systemtable>
+  <columns>
+   <connections preferredWidth="47" />
+   <irq preferredWidth="34" />
+  </columns>
+ </systemtable>
+ <clocktable>
+  <columns>
+   <clockname preferredWidth="269" />
+   <clocksource preferredWidth="269" />
+   <frequency preferredWidth="250" />
+  </columns>
+ </clocktable>
+ <library
+   expandedCategories="Library/Embedded Processors,Library/Clock and Reset,Library/Peripherals/Display,Library,Library/Configuration &amp; Programming,Library/Peripherals/Debug and Performance,Project,Library/Peripherals" />
+ <window width="1100" height="800" x="1" y="19" />
+ <hdlexample language="VERILOG" />
+</preferences>

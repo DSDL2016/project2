@@ -1,0 +1,13 @@
+# intermediate files
+*_db/
+db/
+
+# compiled result
+simulation/
+build/
+
+# backups
+*.bak
+
+# report
+*.rpt
