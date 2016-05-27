@@ -7,7 +7,7 @@ input key1_on,
 input	[1:0]	iSrc_Select,
 input			iCLK_18_4,
 input			iRST_N,
-input   [15:0]	sound1,
+input   [15:0]	sound1
 						);				
 
 parameter	REF_CLK			=	18432000;	//	18.432	MHz
