@@ -1,9 +1,6 @@
 module project2_top (
   input				_CLOCK_27,
 	input				_CLOCK_50,
-	
-	input 			switch_string_wav,
-	output			led_switch_string_wav,
 
 	input 			switch_mute,	
 	output			led_switch_mute,
@@ -99,8 +96,8 @@ module project2_top (
 	assign {	start_pause_led, lap_led, reset_led, clear_led } = keys;
 	
 	// preview the switch output
-	assign { led_switch_marquee, led_switch_ticking_sound, led_switch_string_wav, led_switch_mute }
-			= { switch_marquee, switch_ticking_sound, switch_string_wav, switch_mute};	
+	assign { led_switch_marquee, led_switch_ticking_sound,  led_switch_mute }
+			= { switch_marquee, switch_ticking_sound, switch_mute};	
 				
 	
 	
@@ -270,7 +267,6 @@ module project2_top (
 		.START_KEY2 (clear_key),
 
 		////////////////////	DPDT Switch		////////////////////
-		.SW_STRING (switch_string_wav),
 		.SW_MUTE (switch_mute),
 
 		////////////////////	I2C		////////////////////////////

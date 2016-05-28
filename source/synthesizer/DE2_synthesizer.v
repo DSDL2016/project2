@@ -65,13 +65,10 @@ module DE2_synthesizer (
 		START_KEY1,
 		START_KEY2,			
 		////////////////////	DPDT Switch		////////////////////
-		SW_STRING,
 		SW_MUTE,		
 		////////////////////	I2C		////////////////////////////
 		I2C_SDAT,						//	I2C Data
 		I2C_SCLK,						//	I2C Clock
-		
-	
 		////////////////	Audio CODEC		////////////////////////
 		AUD_ADCLRCK,					//	Audio CODEC ADC LR Clock
 		AUD_ADCDAT,						//	Audio CODEC ADC Data
@@ -89,7 +86,6 @@ module DE2_synthesizer (
 	input			START_KEY1;
 	input			START_KEY2;	
 ////////////////////////	DPDT Switch		////////////////////////
-	input 		SW_STRING;
 	input 		SW_MUTE;
 ////////////////////////	I2C		////////////////////////////////
 	inout			I2C_SDAT;				//	I2C Data
@@ -193,43 +189,27 @@ module DE2_synthesizer (
 // Staff Display & Sound Output //
 
 	staff st1(
-		
-		// Key code-in //
-		
 		.scan_code1( demo_code ),
-		//Sound Output to Audio Generater//
-		
 		.sound1( sound1 ),
-		
 		.sound_off1( sound_off1 )
-		
 	);
 
-///////LED Display////////
-
-	//assign LEDR[9:6] = { sound_off1,sound_off1,sound_off1,sound_off1 };
-						
 // 2CH Audio Sound output -- Audio Generater //
 
 	adio_codec ad1	(	
-	        
 		// AUDIO CODEC //
-		
 		.oAUD_BCK ( AUD_BCLK ),
 		.oAUD_DATA( AUD_DACDAT ),
 		.oAUD_LRCK( AUD_DACLRCK ),																
 		.iCLK_18_4( AUD_CTRL_CLK ),
 		
 		// KEY //
-		
 		.iRST_N( 1'b1 ),							
 		.iSrc_Select( 2'b00 ),
 
 		// Sound Control //
-
 		.key1_on( ~SW_MUTE & sound_off1 ),//CH1 ON / OFF					
-		.sound1( sound1 ),// CH1 Freq						
-		.instru( SW_STRING )  // Instruction Select
+		.sound1( sound1 )// CH1 Freq						
 	);
 
 endmodule

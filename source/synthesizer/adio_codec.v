@@ -8,9 +8,6 @@ input	[1:0]	iSrc_Select,
 input			iCLK_18_4,
 input			iRST_N,
 input   [15:0]	sound1,
-
-input           instru
-
 						);				
 
 parameter	REF_CLK			=	18432000;	//	18.432	MHz
@@ -118,8 +115,7 @@ end
 ///////////////////Wave-Source generate////////////////
 ////////////Timbre selection & SoundOut///////////////
 	wire [15:0]music1_ramp;
-	wire [15:0]music1_sin;
-	wire [15:0]music1=(instru)?music1_ramp:music1_sin;
+	wire [15:0]music1=music1_ramp;
 	wire [15:0]sound_o;
 	assign sound_o=music1;	
 	always@(negedge oAUD_BCK or negedge iRST_N)begin
@@ -142,19 +138,12 @@ end
 	end
 
 ////////////Ramp address assign//////////////
-	wire [5:0]ramp1_ramp=(instru)?ramp1[15:10]:0;
-	wire [5:0]ramp1_sin=(!instru)?ramp1[15:10]:0;
+	wire [5:0] ramp1_ramp=ramp1[15:10];
 
 ////////String-wave Timbre///////
 	wave_gen_string r1(
 		.ramp(ramp1_ramp),
 		.music_o(music1_ramp)
-	);
-
-/////////Brass-wave Timbre////////
-	wave_gen_brass s1(
-		.ramp(ramp1_sin),
-		.music_o(music1_sin)
 	);
 
 endmodule
