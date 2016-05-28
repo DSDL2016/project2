@@ -1,13 +1,16 @@
 module project2_top (
-   input				_CLOCK_27,
+  input				_CLOCK_27,
 	input				_CLOCK_50,
 	
 	input 			switch_string_wav,
 	output			led_switch_string_wav,
+
 	input 			switch_mute,	
 	output			led_switch_mute,
+
 	input 			switch_marquee,
 	output			led_switch_marquee,
+
 	input 			switch_ticking_sound,
 	output			led_switch_ticking_sound,
 	
@@ -50,10 +53,10 @@ module project2_top (
 	
 	// lcd module interface
 	output	[7:0]	lcd_data,
-	output			lcd_rw, lcd_en, lcd_rs,
-	output			lcd_on, lcd_blon,
+	output			  lcd_rw, lcd_en, lcd_rs,
+	output			  lcd_on, lcd_blon,
 	
-	output [10:0] ledr
+	output [10:0] marquee_led
 );
    
 	
@@ -205,12 +208,12 @@ module project2_top (
 	 */
 	generate 
 	   for (i = 0; i < 10; i = i+1) begin: MARQUEE
-			assign ledr[i] = switch_marquee & 
+			assign marquee_led[i] = switch_marquee & 
 								((bcd[0][1] == i && ~ bcd[1][0][0]) || (bcd[0][1] == (10 - i) && bcd[1][0][0]));
 		end
 	endgenerate
 	
-	assign ledr[10] = switch_marquee & (bcd[0][1] == 4'd0 &&  bcd[1][0][0]);
+	assign marquee_led[10] = switch_marquee & (bcd[0][1] == 4'd0 &&  bcd[1][0][0]);
 	
 	
 	/*
@@ -250,23 +253,30 @@ module project2_top (
 	);
 	
 	assign lcd_updating = lcd_busy;
-	
+
+
+	/*
+	 * Synthesizer module.
+	 */
+
 	wire is_1sec = (bcd[0][1] == 4'b0000) && timer_running && switch_ticking_sound;
-	
+
 	DE2_synthesizer synthesizer (	 
 		.CLOCK_27 (_CLOCK_27),							
-		.CLOCK_50 (_CLOCK_50),											
+		.CLOCK_50 (_CLOCK_50),										
+
 		////////////////////	Push Button		////////////////////
-		.START_KEY1 ( start_pause_key & lap_key & reset_key & ~is_1sec),
-		.START_KEY2 ( clear_key ),			
+		.START_KEY1 (start_pause_key & lap_key & reset_key & ~is_1sec),
+		.START_KEY2 (clear_key),
+
 		////////////////////	DPDT Switch		////////////////////
 		.SW_STRING (switch_string_wav),
-		.SW_MUTE (switch_mute),						
+		.SW_MUTE (switch_mute),
+
 		////////////////////	I2C		////////////////////////////
 		.I2C_SDAT (_I2C_SDAT),					
 		.I2C_SCLK (_I2C_SCLK),						
 		
-	
 		////////////////	Audio CODEC		////////////////////////
 		.AUD_ADCLRCK (_AUD_ADCLRCK),				
 		.AUD_ADCDAT (_AUD_ADCDAT),						
